@@ -1,6 +1,10 @@
 # 🎓 Liderança, Comunicação e Conflitos em Equipes de Tecnologia
 ### Estudo de Caso: **Nexo Campus Tecnologia** — Seminário Grupo 3
 
+🌐 **Acesso Online Direto (GitHub Pages):**  
+👉 **[Abrir Painel do Apresentador & Controle (`index.html`)](https://amandoluizdacruz.github.io/seminario-nexo-campus-slides/)**  
+👉 **[Abrir Tela Direta do Projetor (`projetor.html`)](https://amandoluizdacruz.github.io/seminario-nexo-campus-slides/projetor.html)**
+
 > **Integrantes do Grupo 3:**
 > - **Amando Luiz** (Slides 5, 6 e 7 — Propostas de Ação, Protocolo Prático e Reflexão Final)
 > - **Yago Armand** (Slides 1 e 2 — Recorte do Problema e Base Conceitual I)
