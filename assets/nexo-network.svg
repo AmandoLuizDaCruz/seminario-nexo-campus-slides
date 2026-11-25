@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.24"/>
+      <stop offset="55%" stop-color="#06b6d4" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#07090e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tensionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="nodeIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Grid & Glow -->
+  <rect width="640" height="480" fill="#090d16" rx="16"/>
+  <circle cx="320" cy="235" r="220" fill="url(#bgGlow)"/>
+
+  <!-- Architectural Orbit Rings -->
+  <circle cx="320" cy="235" r="155" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <circle cx="320" cy="235" r="105" fill="none" stroke="#334155" stroke-width="1" stroke-opacity="0.6"/>
+
+  <!-- Normal Connections to Central Platform -->
+  <line x1="320" y1="80" x2="320" y2="195" stroke="#6366f1" stroke-width="2" stroke-dasharray="4 4" opacity="0.7"/>
+  <line x1="475" y1="185" x2="360" y2="225" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+  <line x1="415" y1="365" x2="345" y2="270" stroke="#38bdf8" stroke-width="2" opacity="0.6"/>
+  <line x1="165" y1="185" x2="280" y2="225" stroke="#818cf8" stroke-width="2" opacity="0.7"/>
+  <line x1="225" y1="365" x2="295" y2="270" stroke="#fb7185" stroke-width="2" opacity="0.7"/>
+
+  <!-- High-Tension Friction Arc between Desenvolvimento (Left) & Atendimento (Bottom-Left) -->
+  <path d="M 155 215 Q 145 305 200 355" fill="none" stroke="url(#tensionGrad)" stroke-width="4" filter="url(#glow)" stroke-dasharray="8 4">
+    <animate attributeName="stroke-dashoffset" from="0" to="24" dur="1.5s" repeatCount="indefinite"/>
+  </path>
+
+  <!-- Friction Warning Badge on Arc -->
+  <g transform="translate(112, 272)">
+    <rect x="0" y="0" width="96" height="28" rx="14" fill="#2e1019" stroke="#f43f5e" stroke-width="1.5"/>
+    <circle cx="15" cy="14" r="5" fill="#f43f5e">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="27" y="18" fill="#fecdd3" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">ATRITO</text>
+  </g>
+
+  <!-- Central Node: Nexo Campus EdTech Platform (18 Pessoas) -->
+  <g transform="translate(320, 235)">
+    <circle r="48" fill="#111827" stroke="url(#nodeIndigo)" stroke-width="3" filter="url(#glow)"/>
+    <circle r="38" fill="#1e1b4b" opacity="0.6"/>
+    <text x="0" y="-4" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="15" font-weight="800">NEXO</text>
+    <text x="0" y="14" text-anchor="middle" fill="#38bdf8" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700">18 PESSOAS</text>
+  </g>
+
+  <!-- Node 1: GESTÃO (Top) -->
+  <g transform="translate(320, 68)">
+    <rect x="-65" y="-24" width="130" height="48" rx="12" fill="#131b2e" stroke="#fbbf24" stroke-width="2"/>
+    <text x="0" y="-2" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">GESTÃO</text>
+    <text x="0" y="14" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">Decisões s/ critério</text>
+  </g>
+
+  <!-- Node 2: DESENVOLVIMENTO (Left) -->
+  <g transform="translate(135, 180)">
+    <rect x="-82" y="-26" width="164" height="52" rx="12" fill="#131b2e" stroke="#818cf8" stroke-width="2"/>
+    <text x="0" y="-3" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">DESENVOLVIMENTO</text>
+    <text x="0" y="15" text-anchor="middle" fill="#a5b4fc" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">Sobrecarga &amp; Escopo</text>
+  </g>
+
+  <!-- Node 3: ATENDIMENTO (Bottom Left) -->
+  <g transform="translate(215, 385)">
+    <rect x="-74" y="-26" width="148" height="52" rx="12" fill="#131b2e" stroke="#f43f5e" stroke-width="2"/>
+    <text x="0" y="-3" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">ATENDIMENTO</text>
+    <text x="0" y="15" text-anchor="middle" fill="#fda4af" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">Pressão do Cliente</text>
+  </g>
+
+  <!-- Node 4: SUPORTE (Bottom Right) -->
+  <g transform="translate(430, 385)">
+    <rect x="-65" y="-26" width="130" height="52" rx="12" fill="#131b2e" stroke="#38bdf8" stroke-width="2"/>
+    <text x="0" y="-3" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">SUPORTE</text>
+    <text x="0" y="15" text-anchor="middle" fill="#7dd3fc" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">Chamados em Fila</text>
+  </g>
+
+  <!-- Node 5: DESIGN (Right) -->
+  <g transform="translate(505, 180)">
+    <rect x="-65" y="-26" width="130" height="52" rx="12" fill="#131b2e" stroke="#2dd4bf" stroke-width="2"/>
+    <text x="0" y="-3" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">DESIGN</text>
+    <text x="0" y="15" text-anchor="middle" fill="#5eead4" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">Produto EdTech</text>
+  </g>
+</svg>

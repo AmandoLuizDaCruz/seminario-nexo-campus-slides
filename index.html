@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Apresentador &amp; Controle — Caso Nexo Campus (Grupo 3)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="control-body">
+  <div class="bg-grid-overlay"></div>
+
+  <!-- ========================================================================
+       1. TOP COMMAND BAR (Launch Projector, Dual Predictive Timers & Handoff)
+       ======================================================================== -->
+  <header class="control-topbar">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="brand-pill">
+        <span class="brand-dot"></span>
+        <span>CONTROLE • GRUPO 3</span>
+      </div>
+
+      <!-- Opens projetor.html in another tab to drag to Monitor 2 -->
+      <button class="launch-projector-btn" id="launchProjectorBtn">
+        <span>🚀 Iniciar Apresentação (Abrir Guia da Turma)</span>
+      </button>
+
+      <div class="sync-status-pill" id="syncStatusPill">
+        <span id="syncStatusDot">⚪</span>
+        <span id="syncStatusText">Guia da turma fechada</span>
+      </div>
+    </div>
+
+    <!-- Center: Dual Smart Predictive Timers (Green / Yellow / Red) + Speaker Handoff Controls -->
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <!-- Ascending General Timer -->
+      <div class="timer-pill-state state-green" id="ctrlGeneralTimerPill" title="Timer Geral Crescente com Previsão Inteligente">
+        <span style="font-size: 0.72rem; opacity: 0.85;">GERAL ↗</span>
+        <span id="ctrlGeneralTime" style="font-size: 1.05rem;">00:00</span>
+        <span id="ctrlPredictedTotal" style="font-size: 0.74rem; opacity: 0.8;">(Prev ~14:00)</span>
+      </div>
+
+      <!-- Descending Current Speaker / Q&A Timer -->
+      <div class="timer-pill-state state-green" id="ctrlSpeakerTimerPill" title="Timer Decrescente do Apresentador Atual / Perguntas">
+        <span id="ctrlSpeakerPhaseLabel" style="font-size: 0.72rem; opacity: 0.9;">YAGO ↘</span>
+        <span id="ctrlSpeakerTime" style="font-size: 1.05rem;">04:00</span>
+      </div>
+
+      <!-- Direct Action Button to Confirm Start / Confirm Next Speaker Handoff -->
+      <button class="handoff-confirm-btn" id="quickConfirmPhaseBtn" title="Confirmar início ou troca de apresentador (reseta o timer decrescente para a meta do apresentador)">
+        ✅ Confirmar Início: Yago (04:00)
+      </button>
+
+      <button class="hud-btn" id="timerPauseResumeBtn" style="padding: 6px 10px;" title="Pausar/Retomar relógios">⏸</button>
+      <button class="hud-btn" id="timerResetAllBtn" style="padding: 6px 9px;" title="Reiniciar todos os timers do zero">↺</button>
+    </div>
+
+    <!-- Right: Remote Controls for the Classroom Projector -->
+    <div style="display: flex; align-items: center; gap: 7px;">
+      <button class="hud-btn active" id="remoteTipsToggleBtn" title="Mostrar/Ocultar Dicas no Canto Direito do Projetor">
+        💡 Dicas ON
+      </button>
+      <button class="hud-btn" id="remoteFontDecBtn" title="Reduzir fonte na tela da turma">A-</button>
+      <button class="hud-btn" id="remoteFontIncBtn" title="Aumentar fonte na tela da turma">A+</button>
+      <button class="hud-btn" id="remoteThemeBtn" title="Alternar Fundo Escuro/Claro na tela da turma">
+        <span id="remoteThemeLabel">☀️ Claro</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. FIXED LINEAR TRACK BAR (DOUBLY LINKED LIST: PREV <-> CURRENT <-> NEXT)
+       ArrowLeft and ArrowRight exclusively traverse this Doubly Linked List!
+       ======================================================================== -->
+  <nav class="linear-track-bar" id="linearTrackBar" aria-label="Linha Linear de Apresentação (Lista Duplamente Encadeada)">
+    <button class="linear-step-btn" id="linearPrevNodeBtn" title="Voltar ao Nó Anterior na Lista Duplamente Encadeada (Exclusivo: Seta Esquerda ⬅)">
+      <span>⬅ Nó Anterior</span>
+      <span class="kbd-hint">←</span>
+    </button>
+
+    <div class="linked-nodes-scroll" id="linkedNodesScroll">
+      <!-- Populated dynamically with DoublyLinkedNode pills: [Prev] <-> [CURRENT] <-> [Next] -->
+    </div>
+
+    <button class="linear-step-btn advance-primary" id="linearNextNodeBtn" title="Avançar para o Próximo Nó na Linearidade (Exclusivo: Seta Direita ➡)">
+      <span>Avançar Linearidade ➡</span>
+      <span class="kbd-hint" style="background: rgba(0,0,0,0.3); color: #fff;">→</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================================
+       3. DYNAMIC SPEAKER HANDOFF CONFIRMATION BANNER
+       Appears automatically when entering a new speaker's slide or Q&A phase!
+       ======================================================================== -->
+  <div class="handoff-confirm-banner" id="handoffConfirmBanner" style="display: none;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 1.35rem;">🔔</span>
+      <div>
+        <strong id="handoffBannerTitle" style="font-size: 0.98rem; color: #f8fafc;">
+          Confirmação de Troca de Apresentador
+        </strong>
+        <p id="handoffBannerDesc" style="font-size: 0.84rem; color: #fde68a;">
+          Ao confirmar, o timer decrescente será reiniciado com os minutos previstos deste apresentador.
+        </p>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="handoff-confirm-btn" id="bannerConfirmBtn">
+        ✅ Confirmar Troca Agora
+      </button>
+      <button class="hud-btn" id="bannerDismissBtn" style="padding: 6px 12px;">
+        Ainda não
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       4. 3-COLUMN PRESENTER & OPERATOR COCKPIT (Parallel / Mouse Navigation)
+       ======================================================================== -->
+  <main class="cockpit-grid">
+
+    <!-- COLUMN 1 (LEFT): 7 SLIDES PARALLEL NAVIGATOR & SPEAKER PHASES -->
+    <section class="cockpit-panel">
+      <header class="cockpit-panel-header">
+        <span class="cockpit-panel-title">1. SLIDES &amp; TROCA DE FALA</span>
+        <span style="font-family: var(--font-mono); font-size: 0.74rem; color: #94a3b8;">Teclas 1 a 7</span>
+      </header>
+
+      <!-- Manual Speaker Phase Switcher / Confirmation -->
+      <div style="padding: 10px 12px; background: #131826; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: #fbbf24; text-transform: uppercase;">
+          ETAPA DO TIMER DECRESCENTE (CONFIRMAR):
+        </span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;" id="phaseButtonsGrid">
+          <button class="hud-btn" data-confirm-phase="yago" style="justify-content: space-between; font-size: 0.78rem; padding: 6px 9px;">
+            <span>1. Yago</span><span class="kbd-hint">04:00</span>
+          </button>
+          <button class="hud-btn" data-confirm-phase="carlos" style="justify-content: space-between; font-size: 0.78rem; padding: 6px 9px;">
+            <span>2. Carlos</span><span class="kbd-hint">04:30</span>
+          </button>
+          <button class="hud-btn" data-confirm-phase="amando" style="justify-content: space-between; font-size: 0.78rem; padding: 6px 9px;">
+            <span>3. Amando</span><span class="kbd-hint">05:30</span>
+          </button>
+          <button class="hud-btn" data-confirm-phase="perguntas" style="justify-content: space-between; font-size: 0.78rem; padding: 6px 9px;">
+            <span>4. Perguntas</span><span class="kbd-hint">04:00</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="cockpit-panel-body" id="slidesListContainer">
+        <!-- Populated dynamically with the 7 slides -->
+      </div>
+    </section>
+
+    <!-- COLUMN 2 (CENTER): LIVE PROJECTOR MONITOR + PARALLEL GRAPHIC TRIGGERS -->
+    <section class="cockpit-panel">
+      <header class="cockpit-panel-header">
+        <div>
+          <span class="cockpit-panel-title">2. GATILHOS MANUAIS DE JANELAS &amp; GRÁFICOS (PARALELO / MOUSE)</span>
+        </div>
+        <button class="hud-btn" id="closeRemoteModalBtn" style="background: rgba(244,63,94,0.18); border-color: rgba(251,113,133,0.5); color: #fecdd3; display: none;">
+          ✕ Fechar Janela no Projetor (Esc)
+        </button>
+      </header>
+
+      <div class="cockpit-panel-body">
+        <!-- Live Preview Box of What the Class Sees Right Now -->
+        <div class="live-preview-wrapper">
+          <div class="mini-projector-frame" title="Retorno ao vivo da Tela da Turma">
+            <iframe src="projetor.html" id="miniPreviewIframe" tabindex="-1"></iframe>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <span style="font-family: var(--font-mono); font-size: 0.76rem; padding: 3px 8px; border-radius: 6px; background: rgba(34,211,238,0.15); color: #22d3ee; font-weight: 800;">
+                NÓ ATUAL NA LISTA: <span id="liveNodeIndexLabel">01 / 28</span>
+              </span>
+              <span id="liveSpeakerBadge" style="font-family: var(--font-mono); font-size: 0.82rem; color: #a5b4fc; font-weight: 700;">
+                🎙️ Yago Armand
+              </span>
+            </div>
+            <h2 id="liveSlideTitle" style="font-size: 1.25rem; font-weight: 800; color: #f8fafc; line-height: 1.2;">
+              Slide 1 — Capa e Recorte do Problema
+            </h2>
+            <div id="liveModalStatusBanner" style="padding: 8px 12px; border-radius: 10px; background: #0f131d; border: 1px solid rgba(255,255,255,0.12); font-size: 0.88rem; font-weight: 700; color: #cbd5e1;">
+              📺 Tela da turma mostrando: <strong>Slide Limpo</strong>
+            </div>
+            <div id="livePacingBanner" style="padding: 7px 12px; border-radius: 8px; background: rgba(16,185,129,0.12); border: 1px solid rgba(52,211,153,0.4); font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: #34d399;">
+              🟢 Previsão IA de Ritmo: Aguardando confirmação de início
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+          <span style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">
+            👇 Navegação Livre (Mouse ou Teclas A, S, D, F) — ou use as Setas ⬅ ➡ para seguir a lista linear:
+          </span>
+        </div>
+
+        <!-- Dynamic Grid of Interactive Card & Sub-tab Triggers for Current Slide -->
+        <div class="triggers-grid" id="triggersGridContainer">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUMN 3 (RIGHT): PRESENTER TELEPROMPTER & SPEAKING GUIDE -->
+    <section class="cockpit-panel">
+      <header class="cockpit-panel-header">
+        <span class="cockpit-panel-title">3. ROTEIRO DE FALA &amp; DICAS DO NÓ</span>
+        <span id="notesTargetTime" style="font-family: var(--font-mono); font-size: 0.8rem; color: #fbbf24; font-weight: 800;">⏱️ 1 min 30 s</span>
+      </header>
+
+      <div class="cockpit-panel-body">
+        <div class="notes-speaker-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong id="notesSpeakerName" style="font-size: 1.12rem; color: #f8fafc;">🎙️ Yago Armand</strong>
+            <span style="font-family: var(--font-mono); font-size: 0.74rem; color: #a5b4fc;">VISÍVEL SÓ AQUI</span>
+          </div>
+          <p id="notesObjective" style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.38;"></p>
+        </div>
+
+        <div style="font-family: var(--font-mono); font-size: 0.76rem; font-weight: 800; color: #22d3ee; text-transform: uppercase;">
+          💡 Dicas enviadas para o canto direito do projetor neste nó:
+        </div>
+        <ul class="notes-list" id="nodeSpecificTipsList" style="gap: 8px;"></ul>
+
+        <div style="font-family: var(--font-mono); font-size: 0.76rem; font-weight: 800; color: #34d399; text-transform: uppercase; margin-top: 4px;">
+          🎙️ Roteiro completo do slide:
+        </div>
+        <ul class="notes-list" id="notesBulletsList"></ul>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="shared-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 520" width="100%" height="100%">
+  <defs>
+    <linearGradient id="clashGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <rect width="460" height="520" rx="16" fill="#0b0f19"/>
+
+  <!-- Title inside SVG -->
+  <text x="230" y="36" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" letter-spacing="1.5">MECANISMO DO ATRITO</text>
+
+  <!-- Top Box: GESTÃO (Falha de Coordenação) -->
+  <g transform="translate(55, 56)">
+    <rect width="350" height="86" rx="14" fill="#161c2a" stroke="#fbbf24" stroke-width="2"/>
+    <text x="175" y="28" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono, monospace" font-size="12" font-weight="800">1. GESTÃO SEM FILTRO</text>
+    <text x="175" y="50" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="15" font-weight="800">Autoridade Formal s/ Critério</text>
+    <text x="175" y="70" text-anchor="middle" fill="#cbd5e1" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600">Mudanças bruscas • Tarefas sem dono</text>
+  </g>
+
+  <!-- Arrows down from Gestão -->
+  <path d="M 140 142 L 140 185" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="5 4"/>
+  <path d="M 320 142 L 320 185" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="5 4"/>
+
+  <!-- Middle Box 1: ATENDIMENTO -->
+  <g transform="translate(30, 188)">
+    <rect width="185" height="148" rx="14" fill="#1e121a" stroke="#f43f5e" stroke-width="2"/>
+    <text x="92" y="28" text-anchor="middle" fill="#fb7185" font-family="JetBrains Mono, monospace" font-size="12" font-weight="800">ATENDIMENTO</text>
+    <text x="92" y="54" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="800">Posição:</text>
+    <text x="92" y="73" text-anchor="middle" fill="#fecdd3" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600">"Preciso disso hoje!"</text>
+    <line x1="20" y1="88" x2="165" y2="88" stroke="#f43f5e" stroke-opacity="0.3"/>
+    <text x="92" y="108" text-anchor="middle" fill="#34d399" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">Interesse Real:</text>
+    <text x="92" y="128" text-anchor="middle" fill="#cbd5e1" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600">Resolver dor do cliente</text>
+  </g>
+
+  <!-- Middle Box 2: DESENVOLVIMENTO -->
+  <g transform="translate(245, 188)">
+    <rect width="185" height="148" rx="14" fill="#11172a" stroke="#818cf8" stroke-width="2"/>
+    <text x="92" y="28" text-anchor="middle" fill="#818cf8" font-family="JetBrains Mono, monospace" font-size="12" font-weight="800">DESENVOLVIMENTO</text>
+    <text x="92" y="54" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="14" font-weight="800">Posição:</text>
+    <text x="92" y="73" text-anchor="middle" fill="#c7d2fe" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600">"Não dá para encaixar!"</text>
+    <line x1="20" y1="88" x2="165" y2="88" stroke="#818cf8" stroke-opacity="0.3"/>
+    <text x="92" y="108" text-anchor="middle" fill="#22d3ee" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="800">Interesse Real:</text>
+    <text x="92" y="128" text-anchor="middle" fill="#cbd5e1" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="600">Estabilidade em produção</text>
+  </g>
+
+  <!-- Clash Lightning Icon in Center -->
+  <circle cx="230" cy="262" r="20" fill="#2e1019" stroke="#f43f5e" stroke-width="2" filter="url(#softGlow)"/>
+  <text x="230" y="268" text-anchor="middle" fill="#fb7185" font-family="JetBrains Mono, monospace" font-size="16" font-weight="800">⇄</text>
+
+  <!-- Converging Arrows to Bottom Outcome -->
+  <path d="M 122 336 L 195 390" stroke="#f43f5e" stroke-width="2.5"/>
+  <path d="M 337 336 L 265 390" stroke="#818cf8" stroke-width="2.5"/>
+
+  <!-- Bottom Box: RESULTADO SEM MEDIAÇÃO -->
+  <g transform="translate(45, 392)">
+    <rect width="370" height="96" rx="14" fill="#241019" stroke="#f43f5e" stroke-width="2"/>
+    <text x="185" y="28" text-anchor="middle" fill="#fb7185" font-family="JetBrains Mono, monospace" font-size="12" font-weight="800">SEM SEGURANÇA PSICOLÓGICA &amp; CNV</text>
+    <text x="185" y="54" text-anchor="middle" fill="#f8fafc" font-family="Plus Jakarta Sans, sans-serif" font-size="16" font-weight="800">Conflito Destrutivo &amp; Sobrecarga</text>
+    <text x="185" y="76" text-anchor="middle" fill="#fecdd3" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="600">Linguagem avaliativa • Ataques • Operação travada</text>
+  </g>
+</svg>

@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projetor da Turma — Caso Nexo Campus Tecnologia (Grupo 3)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="projector-body">
+  <div class="bg-grid-overlay"></div>
+
+  <!-- Discreet Auto-Hiding Fullscreen Button (Top-Left when mouse moves) -->
+  <button class="projector-fs-pill" id="projectorFsBtn" style="right: auto; left: 20px;" title="Colocar Projetor em Tela Cheia (F11)">
+    ⛶ Tela Cheia no Projetor
+  </button>
+
+  <!-- ========================================================================
+       RIGHT-CORNER DISCREET PRESENTER HUD (2 Smart Timers + Speaking Tips)
+       ======================================================================== -->
+  <aside class="projector-right-hud" id="projectorRightHud">
+    <div class="projector-dual-timers">
+      <!-- Timer 1: General Ascending Timer -->
+      <div class="proj-timer-box state-green" id="projGeneralTimerBox">
+        <span class="pt-label">GERAL ↗</span>
+        <span class="pt-time" id="projGeneralTime">00:00</span>
+      </div>
+
+      <!-- Timer 2: Specific Speaker / Q&A Descending Timer -->
+      <div class="proj-timer-box state-green" id="projSpeakerTimerBox">
+        <span class="pt-label" id="projSpeakerLabel">YAGO ↘</span>
+        <span class="pt-time" id="projSpeakerTime">04:00</span>
+      </div>
+    </div>
+
+    <!-- Discreet Presentation Tips Card -->
+    <div class="projector-tips-card" id="projTipsCard">
+      <div class="proj-tips-header">
+        <span id="projTipsNodeTitle">💡 DICAS DO MOMENTO</span>
+        <span id="projPredTotal">Prev ~14:00</span>
+      </div>
+      <ul class="proj-tips-list" id="projTipsList">
+        <li>Abrir direto no problema: 18 pessoas quebra a informalidade</li>
+        <li>Não é falta de código: é falha de coordenação humana</li>
+        <li>Apresentar as 5 áreas e os 3 sintomas críticos</li>
+      </ul>
+      <div class="proj-pacing-cue" id="projPacingCue">
+        🟢 Ritmo ideal • Aguardando confirmação de início
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       100% CLEAN AUDIENCE STAGE (7 SLIDES — NO OPERATOR CLUTTER)
+       ======================================================================== -->
+  <main class="deck-stage projector-stage" id="deckStage">
+
+    <!-- ======================================================================
+         SLIDE 1 — CAPA E RECORTE DO PROBLEMA
+         ====================================================================== -->
+    <section class="slide active" data-slide="1">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-title-group">
+            <span class="slide-kicker">● SLIDE 01 / 07 • ESTUDO DE CASO EM TECNOLOGIA</span>
+            <h1 class="slide-title">Liderança, Comunicação e Conflitos em Equipes de Tecnologia</h1>
+            <p class="slide-subtitle">Caso Nexo Campus Tecnologia — <strong>Grupo 3</strong> (Amando Luiz, Yago Armand e Carlos)</p>
+          </div>
+          <div class="slide-meta-badges">
+            <span class="meta-pill accent">🎙️ Yago Armand</span>
+          </div>
+        </div>
+
+        <div class="slide1-grid">
+          <!-- Col 1: Recorte da Empresa + Mini Chart -->
+          <article class="interactive-card" data-modal-id="s1-empresa" style="--card-accent: var(--accent-cyan);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-cyan-bg); color: var(--accent-cyan); border-color: var(--accent-cyan-border);">RECORTE DA EMPRESA</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">EDTECH • 18 PESSOAS</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 10px;">Nexo Campus Tecnologia</h2>
+            <ul class="schema-list">
+              <li class="schema-item">
+                <span class="schema-arrow">→</span>
+                <div><span class="schema-key">Plataforma digital</span> para instituições de ensino</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow">→</span>
+                <div><span class="schema-key">18 pessoas</span> em <span class="rel-badge">5 áreas</span> interdependentes:</div>
+              </li>
+            </ul>
+            <div class="team-chips-row">
+              <span class="dept-chip">💻 Desenvolvimento (7)</span>
+              <span class="dept-chip">🎧 Atendimento (4)</span>
+              <span class="dept-chip">🛠️ Suporte (3)</span>
+              <span class="dept-chip">🎨 Design (2)</span>
+              <span class="dept-chip">🧭 Gestão (2)</span>
+            </div>
+            <!-- Mini Proportional Distribution Bar -->
+            <div style="margin-top: auto; padding-top: 10px;">
+              <div style="display:flex; height:10px; border-radius:6px; overflow:hidden; gap:3px;">
+                <span style="flex:7; background:#818cf8;" title="Desenvolvimento"></span>
+                <span style="flex:4; background:#fb7185;" title="Atendimento"></span>
+                <span style="flex:3; background:#38bdf8;" title="Suporte"></span>
+                <span style="flex:2; background:#34d399;" title="Design"></span>
+                <span style="flex:2; background:#fbbf24;" title="Gestão"></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Col 2: Sintomas Críticos Analisados -->
+          <article class="interactive-card" data-modal-id="s1-sintomas" style="--card-accent: var(--accent-rose);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-rose-bg); color: var(--accent-rose); border-color: var(--accent-rose-border);">SINTOMAS CRÍTICOS ANALISADOS</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-rose);">DIAGNÓSTICO INICIAL</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 10px;">Onde a operação trava</h2>
+            <div style="display: flex; flex-direction: column; gap: 11px;">
+              <div class="symptom-item">
+                <span class="symptom-icon">01</span>
+                <span><strong>Prioridades instáveis</strong> e tarefas sem dono claro</span>
+              </div>
+              <div class="symptom-item">
+                <span class="symptom-icon">02</span>
+                <span><strong>Decisões pouco explicadas</strong> à equipe</span>
+              </div>
+              <div class="symptom-item">
+                <span class="symptom-icon">03</span>
+                <span><strong>Atrito recorrente</strong> entre Desenvolvimento e Atendimento + <strong>relatos de sobrecarga</strong></span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Col 3: Visual Architecture Diagram -->
+          <article class="interactive-card" data-modal-id="s1-mapa" style="padding: 14px; --card-accent: var(--accent-indigo);">
+            <div class="card-header" style="margin-bottom: 8px; padding-bottom: 6px;">
+              <span class="card-number-badge">REDE DE TENSÃO (153 CANAIS)</span>
+            </div>
+            <div class="visual-card-img-wrap">
+              <img src="assets/nexo-network.svg" alt="Mapa de Tensão Operacional Nexo Campus" />
+            </div>
+            <div style="padding: 8px 4px 0; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: 0.84rem; color: var(--text-muted);">
+              <span>⚡ FALHA DE COORDENAÇÃO</span>
+              <span style="color: var(--accent-rose); font-weight: 800;">DEV ⇄ ATENDIMENTO</span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Bottom Anchor: Pergunta Norteadora -->
+        <div class="guiding-question-banner interactive-card" data-modal-id="s1-pergunta" style="flex-direction: row; padding: 15px 24px;">
+          <span class="gq-label">PERGUNTA NORTEADORA</span>
+          <p class="gq-text">“Como liderar uma equipe técnica com clareza, escuta, feedback e capacidade de lidar com divergências?”</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SLIDE 2 — BASE CONCEITUAL I: LIDERANÇA, PAPÉIS E AMBIENTE
+         ====================================================================== -->
+    <section class="slide" data-slide="2">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-title-group">
+            <span class="slide-kicker">● SLIDE 02 / 07 • FUNDAMENTAÇÃO TEÓRICA (BLOCOS 1 A 3)</span>
+            <h1 class="slide-title">Base Conceitual I: Liderança, Papéis e Ambiente</h1>
+          </div>
+          <div class="slide-meta-badges">
+            <span class="meta-pill accent">🎙️ Yago Armand</span>
+          </div>
+        </div>
+
+        <div class="three-col-grid">
+          <!-- Bloco 1 -->
+          <article class="interactive-card" data-modal-id="s2-lideranca" style="--card-accent: var(--accent-indigo);">
+            <div class="card-header">
+              <span class="card-number-badge">BLOCO 01</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">DIREÇÃO &amp; CRITÉRIO</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 12px;">1. Liderança, Autoridade e Legitimidade</h2>
+            <ul class="schema-list">
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-amber);">→</span>
+                <div><span class="schema-key">Autoridade formal:</span> poder dado pelo cargo/hierarquia.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-emerald);">→</span>
+                <div><span class="schema-key">Legitimidade:</span> confiança conquistada por coerência, critério e respaldo técnico.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-indigo);">→</span>
+                <div><span class="schema-key">Liderança:</span> alinhar direção e destravar o trabalho da equipe.</div>
+              </li>
+            </ul>
+            <div class="concept-flow-box">
+              <span>Cargo ≠ Respeito</span>
+              <span style="color: var(--accent-indigo);">→</span>
+              <span>Coerência gera Legitimidade</span>
+            </div>
+          </article>
+
+          <!-- Bloco 2 -->
+          <article class="interactive-card" data-modal-id="s2-papeis" style="--card-accent: var(--accent-cyan);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-cyan-bg); color: var(--accent-cyan); border-color: var(--accent-cyan-border);">BLOCO 02</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">FLUXO &amp; INTEGRAÇÃO</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 12px;">2. Papéis, Coordenação e Trabalho em Equipe</h2>
+            <ul class="schema-list">
+              <li class="schema-item">
+                <span class="schema-arrow">→</span>
+                <div><span class="schema-key">Papéis claros:</span> quem decide, quem executa, quem valida.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow">→</span>
+                <div><span class="schema-key">Coordenação:</span> integrar áreas interdependentes sem retrabalho.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow">≠</span>
+                <div><span class="schema-key">Equipe ≠ grupo:</span> metas compartilhadas e responsabilidade mútua.</div>
+              </li>
+            </ul>
+            <div class="concept-flow-box">
+              <span>Decide</span>
+              <span style="color: var(--accent-cyan);">→</span>
+              <span>Executa</span>
+              <span style="color: var(--accent-cyan);">→</span>
+              <span>Valida</span>
+            </div>
+          </article>
+
+          <!-- Bloco 3 -->
+          <article class="interactive-card" data-modal-id="s2-seguranca" style="--card-accent: var(--accent-emerald);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-emerald-bg); color: var(--accent-emerald); border-color: var(--accent-emerald-border);">BLOCO 03</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">AMBIENTE &amp; PREVENÇÃO</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 12px;">3. Feedback e Segurança Psicológica</h2>
+            <ul class="schema-list">
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-emerald);">→</span>
+                <div><span class="schema-key">Feedback:</span> retorno contínuo sobre entregas e condutas <strong>(para corrigir rota, não punir)</strong>.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-emerald);">→</span>
+                <div><span class="schema-key">Segurança psicológica:</span> liberdade para apontar erros, limites e dúvidas sem medo de retaliação.</div>
+              </li>
+            </ul>
+            <div class="concept-flow-box">
+              <span>Segurança + Cobrança Clara</span>
+              <span style="color: var(--accent-emerald);">→</span>
+              <span>Alerta Antes da Crise</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SLIDE 3 — BASE CONCEITUAL II: CONFLITOS E COMUNICAÇÃO
+         ====================================================================== -->
+    <section class="slide" data-slide="3">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-title-group">
+            <span class="slide-kicker">● SLIDE 03 / 07 • FUNDAMENTAÇÃO TEÓRICA (BLOCOS 4 A 6)</span>
+            <h1 class="slide-title">Base Conceitual II: Conflitos e Comunicação</h1>
+          </div>
+          <div class="slide-meta-badges">
+            <span class="meta-pill accent">🎙️ Carlos</span>
+          </div>
+        </div>
+
+        <div class="three-col-grid">
+          <!-- Bloco 4 -->
+          <article class="interactive-card" data-modal-id="s3-conflito" style="--card-accent: var(--accent-amber);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-amber-bg); color: var(--accent-amber); border-color: var(--accent-amber-border);">BLOCO 04</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">NATUREZA DO ATRITO</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 12px;">4. Conflito Construtivo vs. Destrutivo</h2>
+            <ul class="schema-list">
+              <li class="schema-item" style="border-left: 4px solid var(--accent-emerald);">
+                <span class="schema-arrow" style="color: var(--accent-emerald);">✓</span>
+                <div><span class="schema-key">Construtivo:</span> foco no problema e no processo <span class="rel-badge">→ gera soluções melhores</span></div>
+              </li>
+              <li class="schema-item" style="border-left: 4px solid var(--accent-rose);">
+                <span class="schema-arrow" style="color: var(--accent-rose);">✕</span>
+                <div><span class="schema-key">Destrutivo:</span> foco em ataques pessoais e culpados <span class="rel-badge" style="background: var(--accent-rose-bg); color: var(--accent-rose); border-color: var(--accent-rose-border);">→ trava a operação</span></div>
+              </li>
+            </ul>
+            <div class="concept-flow-box">
+              <span>Divergência Técnica ≠ Guerra Pessoal</span>
+            </div>
+          </article>
+
+          <!-- Bloco 5 -->
+          <article class="interactive-card" data-modal-id="s3-iceberg" style="--card-accent: var(--accent-violet);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-violet-bg); color: var(--accent-violet); border-color: var(--accent-violet-border);">BLOCO 05</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">ICEBERG DA NEGOCIAÇÃO</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 12px;">5. Posições, Interesses e Escuta Ativa</h2>
+            <ul class="schema-list">
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-amber);">▲</span>
+                <div><span class="schema-key">Posição:</span> o que a pessoa exige na superfície <em>(“quero isso hoje”)</em>.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-cyan);">▼</span>
+                <div><span class="schema-key">Interesse:</span> a necessidade real por trás do pedido <em>(manter o cliente / proteger a estabilidade do sistema)</em>.</div>
+              </li>
+              <li class="schema-item">
+                <span class="schema-arrow" style="color: var(--accent-emerald);">⇄</span>
+                <div><span class="schema-key">Escuta ativa:</span> ouvir para entender o contexto antes de rebater; base da prevenção.</div>
+              </li>
+            </ul>
+          </article>
+
+          <!-- Bloco 6 -->
+          <article class="interactive-card" data-modal-id="s3-cnv" style="--card-accent: var(--accent-emerald);">
+            <div class="card-header">
+              <span class="card-number-badge" style="background: var(--accent-emerald-bg); color: var(--accent-emerald); border-color: var(--accent-emerald-border);">BLOCO 06</span>
+              <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">MÉTODO DE COMUNICAÇÃO</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 10px;">6. Comunicação Não Violenta (CNV) e Linguagem</h2>
+            <div style="font-family: var(--font-mono); font-size: 0.84rem; color: var(--accent-emerald); font-weight: 700; margin-bottom: 6px;">
+              4 PASSOS DA CNV:
+            </div>
+            <div class="cnv-pipeline">
+              <div class="cnv-step-pill"><span class="cnv-step-num">1</span> Observação →</div>
+              <div class="cnv-step-pill"><span class="cnv-step-num">2</span> Sentimento →</div>
+              <div class="cnv-step-pill"><span class="cnv-step-num">3</span> Necessidade →</div>
+              <div class="cnv-step-pill"><span class="cnv-step-num">4</span> Pedido</div>
+            </div>
+            <ul class="schema-list" style="gap: 8px;">
+              <li class="schema-item" style="border-left: 4px solid var(--accent-rose); padding: 8px 12px;">
+                <span class="schema-arrow" style="color: var(--accent-rose);">✕</span>
+                <div><span class="schema-key">Linguagem avaliativa:</span> rotula e acusa <em>(“vocês são lentos”)</em>.</div>
+              </li>
+              <li class="schema-item" style="border-left: 4px solid var(--accent-emerald); padding: 8px 12px;">
+                <span class="schema-arrow" style="color: var(--accent-emerald);">✓</span>
+                <div><span class="schema-key">Linguagem descritiva:</span> relata fatos e impactos <em>(“o chamado X está parado há 3 dias”)</em>.</div>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SLIDE 4 — DIAGNÓSTICO: O QUE ESTÁ ACONTECENDO NA NEXO CAMPUS
+         ====================================================================== -->
+    <section class="slide" data-slide="4">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-title-group">
+            <span class="slide-kicker">● SLIDE 04 / 07 • APLICAÇÃO CONCEITUAL AO CASO</span>
+            <h1 class="slide-title">Diagnóstico: O Que Está Acontecendo na Nexo Campus</h1>
+          </div>
+          <div class="slide-meta-badges">
+            <span class="meta-pill accent">🎙️ Carlos</span>
+          </div>
+        </div>
+
+        <div class="diagnosis-layout">
+          <div class="diag-table-container">
+            <div class="diag-table-header" style="grid-template-columns: 1fr 48px 1.05fr;">
+              <span style="color: var(--accent-rose);">⚠ Sintoma na Nexo Campus</span>
+              <span style="text-align: center; color: var(--text-muted);">→</span>
+              <span style="color: var(--accent-cyan);">🔍 Leitura Conceitual (Causa)</span>
+            </div>
+
+            <div class="diag-row interactive-card" data-modal-id="s4-diag1" style="grid-template-columns: 1fr 48px 1.05fr; flex-direction: row; padding: 15px 20px; --card-accent: var(--accent-cyan);">
+              <div class="diag-symptom">
+                <span class="symptom-icon">01</span>
+                <span>Prioridades mudam toda hora e tarefas ficam sem dono</span>
+              </div>
+              <div class="diag-connector">→</div>
+              <div class="diag-cause">
+                <span>Falha de coordenação e indefinição de papéis</span>
+              </div>
+            </div>
+
+            <div class="diag-row interactive-card" data-modal-id="s4-diag2" style="grid-template-columns: 1fr 48px 1.05fr; flex-direction: row; padding: 15px 20px; --card-accent: var(--accent-amber);">
+              <div class="diag-symptom">
+                <span class="symptom-icon">02</span>
+                <span>Equipe não entende decisões tomadas pela gestão</span>
+              </div>
+              <div class="diag-connector">→</div>
+              <div class="diag-cause" style="background: var(--accent-amber-bg); border-color: var(--accent-amber-border);">
+                <span>Liderança apoiada só na autoridade formal, sem legitimidade</span>
+              </div>
+            </div>
+
+            <div class="diag-row interactive-card" data-modal-id="s4-diag3" style="grid-template-columns: 1fr 48px 1.05fr; flex-direction: row; padding: 15px 20px; --card-accent: var(--accent-emerald);">
+              <div class="diag-symptom">
+                <span class="symptom-icon">03</span>
+                <span>Sobrecarga sem espaço para frear novas demandas</span>
+              </div>
+              <div class="diag-connector">→</div>
+              <div class="diag-cause" style="background: var(--accent-emerald-bg); border-color: var(--accent-emerald-border);">
+                <span>Baixa segurança psicológica e ausência de feedback bilateral</span>
+              </div>
+            </div>
+
+            <div class="diag-row interactive-card" data-modal-id="s4-diag4" style="grid-template-columns: 1fr 48px 1.05fr; flex-direction: row; padding: 15px 20px; --card-accent: var(--accent-rose);">
+              <div class="diag-symptom">
+                <span class="symptom-icon">04</span>
+                <span>Atrito constante entre Desenvolvimento e Atendimento</span>
+              </div>
+              <div class="diag-connector">→</div>
+              <div class="diag-cause" style="background: var(--accent-rose-bg); border-color: var(--accent-rose-border);">
+                <span>Conflito destrutivo preso em posições e linguagem avaliativa</span>
+              </div>
+            </div>
+          </div>
+
+          <article class="interactive-card" data-modal-id="s4-circuito" style="padding: 14px; --card-accent: var(--accent-rose);">
+            <div class="visual-card-img-wrap">
+              <img src="assets/tension-circuit.svg" alt="Mecanismo do Atrito Dev x Atendimento" />
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SLIDE 5 — PROPOSTAS DE AÇÃO JUSTIFICADAS
+         ====================================================================== -->
+    <section class="slide" data-slide="5">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-title-group">
+            <span class="slide-kicker">● SLIDE 05 / 07 • PLANO DE INTERVENÇÃO OPERACIONAL</span>
+            <h1 class="slide-title">Propostas de Ação Justificadas</h1>
+          </div>
+          <div class="slide-meta-badges">
+            <span class="meta-pill accent">🎙️ Amando Luiz</span>
+          </div>
+        </div>
+
+        <div class="proposals-grid">
+          <article class="interactive-card proposal-card" data-modal-id="s5-prop1" style="--card-accent: var(--accent-cyan);">
+            <div class="proposal-top">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <span class="proposal-num" style="background: var(--accent-cyan-bg); color: var(--accent-cyan); border-color: var(--accent-cyan-border);">01</span>
+                <div>
+                  <span style="font-family: var(--font-mono); font-size: 0.84rem; color: var(--accent-cyan); font-weight: 700;">COORDENAÇÃO &amp; FLUXO</span>
+                  <h2 class="proposal-action-title">Matriz clara de papéis e fila única de triagem</h2>
+                </div>
+              </div>
+            </div>
+            <div class="proposal-justification">
+              <strong style="color: var(--text-primary);">Justificativa →</strong> elimina tarefas sem dono, dá visibilidade às prioridades e impede promessas fora da capacidade real.
+            </div>
+          </article>
+
+          <article class="interactive-card proposal-card" data-modal-id="s5-prop2" style="--card-accent: var(--accent-indigo);">
+            <div class="proposal-top">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <span class="proposal-num">02</span>
+                <div>
+                  <span style="font-family: var(--font-mono); font-size: 0.84rem; color: var(--accent-indigo); font-weight: 700;">LIDERANÇA &amp; LEGITIMIDADE</span>
+                  <h2 class="proposal-action-title">Registro transparente de decisões e critérios</h2>
+                </div>
+              </div>
+            </div>
+            <div class="proposal-justification" style="border-left-color: var(--accent-indigo);">
+              <strong style="color: var(--text-primary);">Justificativa →</strong> constrói legitimidade da liderança ao explicar o “porquê” técnico e comercial de cada prioridade.
+            </div>
+          </article>
+
+          <article class="interactive-card proposal-card" data-modal-id="s5-prop3" style="--card-accent: var(--accent-emerald);">
+            <div class="proposal-top">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <span class="proposal-num" style="background: var(--accent-emerald-bg); color: var(--accent-emerald); border-color: var(--accent-emerald-border);">03</span>
+                <div>
+                  <span style="font-family: var(--font-mono); font-size: 0.84rem; color: var(--accent-emerald); font-weight: 700;">PREVENÇÃO &amp; AMBIENTE</span>
+                  <h2 class="proposal-action-title">Rotina curta de alinhamento e feedback seguro (semanal/quinzenal)</h2>
+                </div>
+              </div>
+            </div>
+            <div class="proposal-justification" style="border-left-color: var(--accent-emerald);">
+              <strong style="color: var(--text-primary);">Justificativa →</strong> cria segurança psicológica para sinalizar sobrecarga e gargalos antes que virem crise.
+            </div>
+          </article>
+
+          <article class="interactive-card proposal-card" data-modal-id="s5-prop4" style="--card-accent: var(--accent-amber);">
+            <div class="proposal-top">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <span class="proposal-num" style="background: var(--accent-amber-bg); color: var(--accent-amber); border-color: var(--accent-amber-border);">04</span>
+                <div>
+                  <span style="font-family: var(--font-mono); font-size: 0.84rem; color: var(--accent-amber); font-weight: 700;">COMUNICAÇÃO &amp; CNV</span>
+                  <h2 class="proposal-action-title">Padrão de comunicação descritiva entre áreas</h2>
+                </div>
+              </div>
+            </div>
+            <div class="proposal-justification" style="border-left-color: var(--accent-amber);">
+              <strong style="color: var(--text-primary);">Justificativa →</strong> substitui cobranças acusatórias por relatos de fato e impacto, transformando atrito em ajuste de processo.
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SLIDE 6 — PRODUTO PRÁTICO: PROTOCOLO DE REUNIÃO E FEEDBACK RESPONSÁVEL
+         ====================================================================== -->
+    <section class="slide" data-slide="6">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <div class="slide-title-group">
+            <span class="slide-kicker">● SLIDE 06 / 07 • ENTREGÁVEL PRÁTICO DO GRUPO 3</span>
+            <h1 class="slide-title">Produto Prático: Protocolo de Reunião e Feedback Responsável</h1>
+          </div>
+          <div class="slide-meta-badges">
+            <span class="meta-pill accent">🎙️ Amando Luiz</span>
+          </div>
+        </div>
+
+        <div class="quadrants-grid">
+          <article class="interactive-card quadrant-card" data-modal-id="s6-q1" style="--card-accent: var(--accent-cyan);">
+            <div class="card-header" style="margin-bottom: 8px; padding-bottom: 6px;">
+              <span class="card-number-badge" style="background: var(--accent-cyan-bg); color: var(--accent-cyan); border-color: var(--accent-cyan-border);">QUADRANTE 1 • 25 MIN</span>
+              <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent-cyan); font-weight: 700;">SEMANAL / SOB DEMANDA</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 8px;">Pauta Breve (25 min)</h2>
+            <div class="time-bar-list">
+              <div class="time-bar-item">
+                <span>1. Fatos da semana: chamados críticos e entregas</span>
+                <span class="time-pill">5 min</span>
+              </div>
+              <div class="time-bar-item">
+                <span>2. Gargalos e sobrecarga</span>
+                <span class="time-pill">5 min</span>
+              </div>
+              <div class="time-bar-item">
+                <span>3. Alinhamento de prioridades Dev × Atendimento</span>
+                <span class="time-pill" style="background: var(--accent-indigo-bg); color: var(--accent-indigo); border-color: var(--accent-indigo-border);">10 min</span>
+              </div>
+              <div class="time-bar-item">
+                <span>4. Encaminhamentos com dono e prazo</span>
+                <span class="time-pill" style="background: var(--accent-emerald-bg); color: var(--accent-emerald); border-color: var(--accent-emerald-border);">5 min</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="interactive-card quadrant-card" data-modal-id="s6-q2" style="--card-accent: var(--accent-indigo);">
+            <div class="card-header" style="margin-bottom: 8px; padding-bottom: 6px;">
+              <span class="card-number-badge">QUADRANTE 2</span>
+              <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted);">ESCUTA ATIVA</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 8px;">Regras de Escuta</h2>
+            <div class="time-bar-list">
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-indigo);">→</strong> Falar sobre <strong>processos e fatos</strong>, nunca rotular pessoas.</span>
+              </div>
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-indigo);">→</strong> Ouvir o relato completo antes de responder <strong>(escuta ativa)</strong>.</span>
+              </div>
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-indigo);">→</strong> Explicitar o <strong>interesse</strong> por trás do pedido.</span>
+              </div>
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-indigo);">→</strong> Todo problema levantado sai com <strong>encaminhamento registrado</strong>.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="interactive-card quadrant-card" data-modal-id="s6-q3" style="--card-accent: var(--accent-emerald);">
+            <div class="card-header" style="margin-bottom: 8px; padding-bottom: 6px;">
+              <span class="card-number-badge" style="background: var(--accent-emerald-bg); color: var(--accent-emerald); border-color: var(--accent-emerald-border);">QUADRANTE 3 • CNV</span>
+              <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent-emerald); font-weight: 700;">AVALIATIVA → DESCRITIVA</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 8px;">Reescrita de Mensagem</h2>
+            <div class="cnv-compare-stack">
+              <div class="msg-box before">
+                <span class="msg-tag rose">✕ ANTES (ACUSATÓRIA)</span>
+                “O pessoal de dev nunca entrega no prazo e deixa o atendimento levando bronca do cliente.”
+              </div>
+              <div class="msg-box after">
+                <span class="msg-tag emerald">✓ DEPOIS (CNV)</span>
+                “Os 3 chamados da Instituição X estão há 4 dias sem atualização <span class="cnv-inline-tag">Observação</span>. A equipe de atendimento fica pressionada e sem resposta para o usuário <span class="cnv-inline-tag">Sentimento</span>. Precisamos de previsibilidade para orientar o cliente <span class="cnv-inline-tag">Necessidade</span>. Podemos definir hoje uma prioridade e um prazo realista de retorno? <span class="cnv-inline-tag">Pedido</span>”
+              </div>
+            </div>
+          </article>
+
+          <article class="interactive-card quadrant-card" data-modal-id="s6-q4" style="--card-accent: var(--accent-amber);">
+            <div class="card-header" style="margin-bottom: 8px; padding-bottom: 6px;">
+              <span class="card-number-badge" style="background: var(--accent-amber-bg); color: var(--accent-amber); border-color: var(--accent-amber-border);">QUADRANTE 4</span>
+              <span style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent-amber); font-weight: 700;">PROCESSO VERIFICÁVEL</span>
+            </div>
+            <h2 class="card-title" style="margin-bottom: 8px;">Encaminhamento do Conflito (Dev × Atendimento)</h2>
+            <div class="time-bar-list">
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-amber);">01.</strong> Separar <strong>urgência real</strong> (sistema fora do ar) de <strong>melhoria</strong> (entra na fila).</span>
+              </div>
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-amber);">02.</strong> Definir <strong>1 responsável de triagem</strong> entre as duas áreas.</span>
+              </div>
+              <div class="time-bar-item">
+                <span><strong style="color: var(--accent-amber);">03.</strong> Revisar o combinado em <strong>15 dias com base em dados</strong> (tempo de resposta e retrabalho).</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SLIDE 7 — PERGUNTA FINAL DE REFLEXÃO
+         ====================================================================== -->
+    <section class="slide" data-slide="7">
+      <div class="slide-inner">
+        <div class="reflection-stage">
+          <img class="reflection-bg-img" src="assets/reflection-wave.svg" alt="" />
+
+          <div style="position: relative; z-index: 2; width: 100%; display: flex; align-items: center; justify-content: space-between;">
+            <span class="reflection-kicker">Reflexão Final — Grupo 3</span>
+            <div class="slide-meta-badges">
+              <span class="meta-pill accent">🎙️ Amando Luiz</span>
+            </div>
+          </div>
+
+          <div class="reflection-content">
+            <h1 class="reflection-question">
+              “Como diferenciar uma discordância produtiva de um conflito que começa a prejudicar uma equipe?”
+            </h1>
+
+            <div class="synthesis-pills">
+              <span class="synth-pill">🧭 Clareza de Papéis</span>
+              <span class="synth-pill">⚖️ Critérios Transparentes</span>
+              <span class="synth-pill">🛡️ Segurança Psicológica</span>
+              <span class="synth-pill">💬 Comunicação Objetiva (CNV)</span>
+            </div>
+          </div>
+
+          <footer class="reflection-footer">
+            <span>Obrigado! Perguntas?</span>
+            <span style="font-family: var(--font-mono); font-size: 1.05rem; color: var(--text-muted);">
+              Grupo 3 • Amando Luiz • Yago Armand • Carlos
+            </span>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       PROJECTOR DEEP-DIVE INTERACTIVE WINDOW (Triggered remotely by index.html)
+       Clean audience view without operator footer clutter!
+       ======================================================================== -->
+  <div class="deep-modal-backdrop" id="deepModalBackdrop" aria-hidden="true">
+    <div class="deep-modal-window" role="dialog" aria-modal="true">
+      <header class="deep-modal-header">
+        <div>
+          <span class="deep-modal-kicker" id="deepModalKicker">APROFUNDAMENTO &amp; ESQUEMA VISUAL</span>
+          <h2 class="deep-modal-title" id="deepModalTitle">Título</h2>
+        </div>
+      </header>
+      <div class="deep-modal-body" id="deepModalBody"></div>
+    </div>
+  </div>
+
+  <script src="shared-data.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const syncBus = new NexoSyncBus("projector");
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const deepModalBackdrop = document.getElementById("deepModalBackdrop");
+      const deepModalKicker = document.getElementById("deepModalKicker");
+      const deepModalTitle = document.getElementById("deepModalTitle");
+      const deepModalBody = document.getElementById("deepModalBody");
+      const projectorFsBtn = document.getElementById("projectorFsBtn");
+
+      // Auto-hide fullscreen helper button after mouse stops moving
+      let fsTimeout = null;
+      document.addEventListener("mousemove", () => {
+        projectorFsBtn.classList.add("visible");
+        clearTimeout(fsTimeout);
+        fsTimeout = setTimeout(() => projectorFsBtn.classList.remove("visible"), 2200);
+      });
+
+      projectorFsBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      const projGeneralTimerBox = document.getElementById("projGeneralTimerBox");
+      const projGeneralTime = document.getElementById("projGeneralTime");
+      const projSpeakerTimerBox = document.getElementById("projSpeakerTimerBox");
+      const projSpeakerLabel = document.getElementById("projSpeakerLabel");
+      const projSpeakerTime = document.getElementById("projSpeakerTime");
+      const projTipsCard = document.getElementById("projTipsCard");
+      const projTipsNodeTitle = document.getElementById("projTipsNodeTitle");
+      const projPredTotal = document.getElementById("projPredTotal");
+      const projTipsList = document.getElementById("projTipsList");
+      const projPacingCue = document.getElementById("projPacingCue");
+
+      function formatSec(sec) {
+        const isNeg = sec < 0;
+        const abs = Math.abs(sec);
+        const mins = Math.floor(abs / 60);
+        const rem = abs % 60;
+        return `${isNeg ? "-" : ""}${String(mins).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
+      }
+
+      function renderProjectorState(state) {
+        if (!state) return;
+
+        // 1. Theme & Font Scale
+        document.documentElement.setAttribute("data-theme", state.theme || "dark");
+        document.documentElement.style.setProperty("--font-scale", state.fontScale || 1.0);
+
+        // 2. Active Slide (0 to 6)
+        const targetIdx = Math.min(Math.max(0, state.slideIndex || 0), slides.length - 1);
+        slides.forEach((slide, idx) => {
+          slide.classList.remove("active", "prev-slide");
+          if (idx === targetIdx) {
+            slide.classList.add("active");
+          } else if (idx < targetIdx) {
+            slide.classList.add("prev-slide");
+          }
+        });
+
+        // 3. Active Interactive Modal & Sub-tab
+        if (state.activeModalId && INTERACTIVE_MODALS[state.activeModalId]) {
+          const data = INTERACTIVE_MODALS[state.activeModalId];
+          deepModalKicker.textContent = data.kicker;
+          deepModalTitle.textContent = data.title;
+
+          const tabs = data.tabs || [];
+          const safeIdx = Math.min(Math.max(0, state.activeModalTabIdx || 0), tabs.length - 1);
+
+          let tabsHtml = "";
+          if (tabs.length > 1) {
+            tabsHtml = `<div class="modal-tabs-bar">`;
+            tabs.forEach((t, i) => {
+              tabsHtml += `
+                <div class="modal-tab-btn ${i === safeIdx ? "active" : ""}" style="cursor:default;">
+                  <span>${t.label}</span>
+                </div>
+              `;
+            });
+            tabsHtml += `</div>`;
+          }
+
+          const stageHtml = `
+            <div class="modal-interactive-stage">
+              ${tabs[safeIdx] ? tabs[safeIdx].html : ""}
+            </div>
+          `;
+
+          deepModalBody.innerHTML = tabsHtml + stageHtml;
+          deepModalBackdrop.classList.add("open");
+        } else {
+          deepModalBackdrop.classList.remove("open");
+        }
+
+        // 4. Right-Corner Dual Timers (Green / Yellow / Red) & Presentation Tips
+        const phase = SPEAKER_PHASES[state.speakerPhase || "yago"] || SPEAKER_PHASES.yago;
+        const currNode = PRESENTATION_LINKED_LIST.getNode(state.linearNodeIndex || 0);
+
+        projGeneralTime.textContent = formatSec(state.generalElapsedSec || 0);
+        projGeneralTimerBox.className = `proj-timer-box state-${state.generalColor || "green"}`;
+
+        projSpeakerLabel.textContent = `${phase.shortName} ↘`;
+        const remSec = state.speakerRemainingSec !== undefined ? state.speakerRemainingSec : phase.budgetSec;
+        projSpeakerTime.textContent = formatSec(remSec);
+        projSpeakerTimerBox.className = `proj-timer-box state-${state.speakerColor || "green"}`;
+
+        if (state.showProjectorTips === false) {
+          projTipsCard.classList.add("hidden");
+        } else {
+          projTipsCard.classList.remove("hidden");
+          projTipsNodeTitle.textContent = `💡 ${currNode.shortLabel}`;
+          projPredTotal.textContent = `Prev ~${state.predictedTotalText || "14:00"}`;
+          projTipsList.innerHTML = (currNode.tips || []).map((t) => `<li>${t}</li>`).join("");
+          const dotIcon = state.speakerColor === "red" ? "🔴" : state.speakerColor === "yellow" ? "🟡" : "🟢";
+          projPacingCue.textContent = `${dotIcon} ${state.pacingAdvice || "Ritmo ideal"}`;
+        }
+      }
+
+      // Apply initial state & listen to remote commands from index.html
+      renderProjectorState(syncBus.state);
+      syncBus.onStateChange((newState) => {
+        renderProjectorState(newState);
+      });
+    });
+  </script>
+</body>
+</html>
