@@ -3,280 +3,275 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>App Mestre Android — Caso Nexo Campus (Grupo 3)</title>
+  <title>Nexo Campus Controle — Grupo 3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="mobile-app.css" />
 </head>
-<body class="control-body">
-  <div class="bg-grid-overlay"></div>
+<body>
+  <div class="app-shell">
 
-  <!-- ========================================================================
-       1. LOCAL NETWORK (LAN / WI-FI) LINK GENERATOR BANNER FOR THE PC
-       ======================================================================== -->
-  <div class="lan-connection-bar" id="lanConnectionBar">
-    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <div class="brand-pill" style="padding: 5px 10px;">
-        <span class="brand-dot"></span>
-        <span>APP MESTRE • GRUPO 3</span>
-      </div>
-
-      <div class="lan-url-pill" title="Digite este link no navegador do PC conectado na mesma rede Wi-Fi ou Hotspot">
-        <span style="font-size: 0.76rem; font-family: var(--font-mono); color: #94a3b8; font-weight: 800;">ABRA NO PC:</span>
-        <span class="lan-url-text" id="lanPrimaryUrlText">http://192.168.0.100:8080</span>
-      </div>
-
-      <button class="lan-copy-btn" id="copyLanUrlBtn">📋 Copiar Link</button>
-      <button class="lan-copy-btn" id="showLanModalBtn" style="background: rgba(99,102,241,0.22); border-color: #818cf8;">
-        📡 QR Code &amp; IPs da Rede
+    <!-- ======================================================================
+         1. COMPACT TOP HEADER BAR (56px)
+         Left: LAN URL Status Chip | Right: 2 Smart Timers (Geral + Apresentador)
+         ====================================================================== -->
+    <header class="app-topbar">
+      <button class="lan-chip" id="topLanChipBtn" title="Toque para ver o Link da Rede Local e IPs">
+        <span class="status-dot" id="topLanDot"></span>
+        <span id="topLanText">192.168.0.100:8080</span>
       </button>
-    </div>
 
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <div class="sync-status-pill connected" id="syncStatusPill">
-        <span id="syncStatusDot">🟢</span>
-        <span id="syncStatusText">Servidor Local Ativo (0 PCs)</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       2. SMART TIMERS & SPEAKER HANDOFF CONFIRMATION BAR
-       ======================================================================== -->
-  <header class="control-topbar">
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; justify-content: space-between;">
-      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <!-- Ascending General Timer -->
-        <div class="timer-pill-state state-green" id="ctrlGeneralTimerPill">
-          <span style="font-size: 0.7rem; opacity: 0.85;">GERAL ↗</span>
-          <span id="ctrlGeneralTime" style="font-size: 1.02rem;">00:00</span>
-          <span id="ctrlPredictedTotal" style="font-size: 0.72rem; opacity: 0.8;">(Prev ~14:00)</span>
+      <div class="top-timers-group">
+        <!-- Timer 1: Ascending Overall Seminar Timer -->
+        <div class="mini-timer-pill state-green" id="ctrlGeneralTimerPill" title="Timer Geral Crescente">
+          <span class="t-lbl">GERAL</span>
+          <span id="ctrlGeneralTime">00:00</span>
         </div>
 
-        <!-- Descending Current Speaker / Q&A Timer -->
-        <div class="timer-pill-state state-green" id="ctrlSpeakerTimerPill">
-          <span id="ctrlSpeakerPhaseLabel" style="font-size: 0.7rem; opacity: 0.9;">YAGO ↘</span>
-          <span id="ctrlSpeakerTime" style="font-size: 1.02rem;">04:00</span>
-        </div>
-
-        <!-- Direct Action Button to Confirm Start / Confirm Next Speaker Handoff -->
-        <button class="handoff-confirm-btn" id="quickConfirmPhaseBtn">
-          ✅ Confirmar Início: Yago (04:00)
-        </button>
-
-        <button class="hud-btn" id="timerPauseResumeBtn" style="padding: 7px 11px;" title="Pausar/Retomar">⏸</button>
-        <button class="hud-btn" id="timerResetAllBtn" style="padding: 7px 10px;" title="Reiniciar timers">↺</button>
-      </div>
-
-      <!-- Remote Controls for the Classroom PC Screen -->
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <button class="hud-btn active" id="remoteTipsToggleBtn">💡 Dicas ON</button>
-        <button class="hud-btn" id="remoteFontDecBtn">A-</button>
-        <button class="hud-btn" id="remoteFontIncBtn">A+</button>
-        <button class="hud-btn" id="remoteThemeBtn">
-          <span id="remoteThemeLabel">☀️ Claro</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- ========================================================================
-       3. FIXED LINEAR TRACK BAR (DOUBLY LINKED LIST: PREV <-> CURRENT <-> NEXT)
-       ======================================================================== -->
-  <nav class="linear-track-bar" id="linearTrackBar" aria-label="Linha Linear de Apresentação">
-    <button class="linear-step-btn" id="linearPrevNodeBtn">
-      <span>⬅ Nó Anterior</span>
-    </button>
-
-    <div class="linked-nodes-scroll" id="linkedNodesScroll">
-      <!-- Populated dynamically with DoublyLinkedNode pills -->
-    </div>
-
-    <button class="linear-step-btn advance-primary" id="linearNextNodeBtn">
-      <span>Avançar Linearidade ➡</span>
-    </button>
-  </nav>
-
-  <!-- ========================================================================
-       4. DYNAMIC SPEAKER HANDOFF CONFIRMATION BANNER
-       ======================================================================== -->
-  <div class="handoff-confirm-banner" id="handoffConfirmBanner" style="display: none;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span style="font-size: 1.3rem;">🔔</span>
-      <div>
-        <strong id="handoffBannerTitle" style="font-size: 0.95rem; color: #f8fafc;">
-          Confirmação de Troca de Apresentador
-        </strong>
-        <p id="handoffBannerDesc" style="font-size: 0.82rem; color: #fde68a;">
-          Ao confirmar, o timer decrescente será reiniciado com os minutos previstos deste apresentador.
-        </p>
-      </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <button class="handoff-confirm-btn" id="bannerConfirmBtn">✅ Confirmar Troca</button>
-      <button class="hud-btn" id="bannerDismissBtn" style="padding: 6px 10px;">Depois</button>
-    </div>
-  </div>
-
-  <!-- ========================================================================
-       5. 3-PANEL COCKPIT (Side-by-Side on Tablet/PC, Tabbed on Smartphone)
-       ======================================================================== -->
-  <main class="cockpit-grid">
-
-    <!-- PANEL 1: 7 SLIDES PARALLEL NAVIGATOR & SPEAKER PHASES -->
-    <section class="cockpit-panel" id="panelSlides">
-      <header class="cockpit-panel-header">
-        <span class="cockpit-panel-title">1. SLIDES &amp; ETAPAS DE FALA</span>
-        <span style="font-family: var(--font-mono); font-size: 0.74rem; color: #94a3b8;">7 Slides</span>
-      </header>
-
-      <div style="padding: 10px 12px; background: #131826; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 6px;">
-        <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: #fbbf24; text-transform: uppercase;">
-          CONFIRMAR TROCA DE APRESENTADOR:
-        </span>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;" id="phaseButtonsGrid">
-          <button class="hud-btn" data-confirm-phase="yago" style="justify-content: space-between; font-size: 0.8rem; padding: 8px 10px;">
-            <span>1. Yago</span><span class="kbd-hint">04:00</span>
-          </button>
-          <button class="hud-btn" data-confirm-phase="carlos" style="justify-content: space-between; font-size: 0.8rem; padding: 8px 10px;">
-            <span>2. Carlos</span><span class="kbd-hint">04:30</span>
-          </button>
-          <button class="hud-btn" data-confirm-phase="amando" style="justify-content: space-between; font-size: 0.8rem; padding: 8px 10px;">
-            <span>3. Amando</span><span class="kbd-hint">05:30</span>
-          </button>
-          <button class="hud-btn" data-confirm-phase="perguntas" style="justify-content: space-between; font-size: 0.8rem; padding: 8px 10px;">
-            <span>4. Perguntas</span><span class="kbd-hint">04:00</span>
-          </button>
+        <!-- Timer 2: Descending Speaker / Q&A Timer -->
+        <div class="mini-timer-pill state-green" id="ctrlSpeakerTimerPill" title="Timer Decrescente do Apresentador Atual">
+          <span class="t-lbl" id="ctrlSpeakerPhaseLabel">YAGO</span>
+          <span id="ctrlSpeakerTime">04:00</span>
         </div>
       </div>
+    </header>
 
-      <div class="cockpit-panel-body" id="slidesListContainer"></div>
-    </section>
+    <!-- ======================================================================
+         2. NATIVELY SCROLLABLE MAIN WORKSPACE (4 Minimalist Views)
+         ====================================================================== -->
+    <main class="app-scroll-main" id="appScrollMain">
 
-    <!-- PANEL 2 (DEFAULT ACTIVE ON MOBILE): LIVE MONITOR + PARALLEL GRAPHIC TRIGGERS -->
-    <section class="cockpit-panel mobile-active-panel" id="panelControls">
-      <header class="cockpit-panel-header">
-        <div>
-          <span class="cockpit-panel-title">2. CONTROLE DE JANELAS &amp; GRÁFICOS NO PC</span>
-        </div>
-        <button class="hud-btn" id="closeRemoteModalBtn" style="background: rgba(244,63,94,0.22); border-color: rgba(251,113,133,0.6); color: #fecdd3; display: none;">
-          ✕ Fechar Janela no PC
-        </button>
-      </header>
+      <!-- ====================================================================
+           VIEW 1: CONTROLE & GRÁFICOS (Default Active View)
+           ==================================================================== -->
+      <section class="tab-view active" id="viewControl">
 
-      <div class="cockpit-panel-body">
-        <div class="live-preview-wrapper">
-          <div class="mini-projector-frame" title="Retorno ao vivo da Tela da Turma">
-            <iframe src="projetor.html" id="miniPreviewIframe" tabindex="-1"></iframe>
+        <!-- Automatic Speaker Handoff Confirmation Alert (Appears when needed) -->
+        <div class="handoff-alert-card" id="handoffConfirmBanner" style="display: none;">
+          <div class="m-row-between">
+            <span class="m-badge amber">🔔 TROCA DE APRESENTADOR</span>
+            <button class="m-btn" id="bannerDismissBtn" style="min-height: 30px; padding: 4px 10px; font-size: 0.76rem;">Depois</button>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
-              <span style="font-family: var(--font-mono); font-size: 0.76rem; padding: 3px 8px; border-radius: 6px; background: rgba(34,211,238,0.15); color: #22d3ee; font-weight: 800;">
-                NÓ LINEAR: <span id="liveNodeIndexLabel">01 / 28</span>
-              </span>
-              <span id="liveSpeakerBadge" style="font-family: var(--font-mono); font-size: 0.82rem; color: #a5b4fc; font-weight: 700;">
-                🎙️ Yago Armand
-              </span>
-            </div>
-            <h2 id="liveSlideTitle" style="font-size: 1.18rem; font-weight: 800; color: #f8fafc; line-height: 1.22;">
-              Slide 1 — Capa e Recorte do Problema
-            </h2>
-            <div id="liveModalStatusBanner" style="padding: 8px 12px; border-radius: 10px; background: #0f131d; border: 1px solid rgba(255,255,255,0.12); font-size: 0.86rem; font-weight: 700; color: #cbd5e1;">
-              📺 Tela do PC mostrando: <strong>Slide Limpo</strong>
-            </div>
-            <div id="livePacingBanner" style="padding: 7px 12px; border-radius: 8px; background: rgba(16,185,129,0.12); border: 1px solid rgba(52,211,153,0.4); font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: #34d399;">
-              🟢 Previsão IA de Ritmo: Aguardando confirmação de início
-            </div>
+          <div id="handoffBannerTitle" style="font-size: 1rem; font-weight: 800; color: #f8fafc;">
+            Confirmar entrada de Carlos (04:30)
+          </div>
+          <button class="m-btn emerald" id="bannerConfirmBtn" style="width: 100%;">
+            ✅ Confirmar Troca e Reiniciar Timer
+          </button>
+        </div>
+
+        <!-- Hero Status Card: Current Slide, Speaker, Pacing & Timer Action -->
+        <div class="m-card hero-state-card">
+          <div class="m-row-between">
+            <span class="m-badge" id="heroSlideBadge">SLIDE 01 / 07</span>
+            <span class="m-badge indigo" id="liveSpeakerBadge">🎙️ Yago Armand</span>
+          </div>
+
+          <h1 class="m-title-lg" id="liveSlideTitle">
+            Slide 1: Capa e Recorte da Nexo Campus
+          </h1>
+
+          <!-- AI Predictive Pacing Pill -->
+          <div class="pacing-pill" id="livePacingBanner">
+            <span id="livePacingText">🟢 Ritmo ideal • Aguardando início</span>
+            <span id="ctrlPredictedTotal" style="opacity: 0.85;">Prev ~14:00</span>
+          </div>
+
+          <!-- Quick Speaker Confirmation & Timer Pause/Reset Row -->
+          <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 8px; padding-top: 2px;">
+            <button class="m-btn emerald" id="quickConfirmPhaseBtn" style="font-size: 0.85rem; padding: 10px 12px;">
+              ✅ Iniciar: Yago (04:00)
+            </button>
+            <button class="m-btn" id="timerPauseResumeBtn" style="min-width: 46px; padding: 0 12px;" title="Pausar/Retomar">⏸</button>
+            <button class="m-btn" id="timerResetAllBtn" style="min-width: 46px; padding: 0 12px;" title="Zerar Timers">↺</button>
           </div>
         </div>
 
-        <div class="triggers-grid" id="triggersGridContainer"></div>
-      </div>
-    </section>
+        <!-- Active Projector Window Status & Close Button -->
+        <div class="m-row-between" style="padding: 2px 2px 0;">
+          <span class="m-section-label">JANELAS &amp; GRÁFICOS DESTE SLIDE</span>
+          <button class="m-btn rose" id="closeRemoteModalBtn" style="display: none; min-height: 34px; padding: 6px 12px; font-size: 0.78rem;">
+            ✕ Fechar Janela no PC
+          </button>
+        </div>
 
-    <!-- PANEL 3: PRESENTER TELEPROMPTER & SPEAKING GUIDE -->
-    <section class="cockpit-panel" id="panelNotes">
-      <header class="cockpit-panel-header">
-        <span class="cockpit-panel-title">3. GUIA DE FALA &amp; DICAS DO NÓ</span>
-        <span id="notesTargetTime" style="font-family: var(--font-mono); font-size: 0.8rem; color: #fbbf24; font-weight: 800;">⏱️ 1 min 30 s</span>
-      </header>
+        <!-- Dynamic List of Interactive Graphics & Sub-tabs for Current Slide -->
+        <div id="triggersGridContainer" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated by app.js -->
+        </div>
 
-      <div class="cockpit-panel-body">
-        <div class="notes-speaker-card">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong id="notesSpeakerName" style="font-size: 1.1rem; color: #f8fafc;">🎙️ Yago Armand</strong>
-            <span style="font-family: var(--font-mono); font-size: 0.72rem; color: #a5b4fc;">SÓ NO CELULAR</span>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 2: ROTEIRO & GUIA DE FALA (Teleprompter Comfort Reading)
+           ==================================================================== -->
+      <section class="tab-view" id="viewScript">
+
+        <div class="m-card">
+          <div class="m-row-between">
+            <span class="m-badge indigo" id="notesSpeakerName">🎙️ Yago Armand</span>
+            <span class="m-badge amber" id="notesTargetTime">⏱️ Meta: 1 min 30 s</span>
           </div>
-          <p id="notesObjective" style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.36;"></p>
+          <p id="notesObjective" style="font-size: 0.92rem; color: var(--text-sub); line-height: 1.45;"></p>
         </div>
 
-        <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 800; color: #22d3ee; text-transform: uppercase;">
-          💡 Dicas deste nó (no canto direito do PC):
-        </div>
-        <ul class="notes-list" id="nodeSpecificTipsList" style="gap: 8px;"></ul>
+        <span class="m-section-label">💡 DICAS DO NÓ ATUAL (VISÍVEIS NO CANTO DO PC)</span>
+        <div id="nodeSpecificTipsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
 
-        <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 800; color: #34d399; text-transform: uppercase; margin-top: 4px;">
-          🎙️ Roteiro completo do slide:
+        <span class="m-section-label" style="margin-top: 6px;">🎙️ O QUE FALAR NESTE SLIDE (NÃO LER O SLIDE)</span>
+        <div id="notesBulletsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+
+      </section>
+
+      <!-- ====================================================================
+           VIEW 3: 7 SLIDES, ETAPAS & TRILHO LINEAR COMPLETO
+           ==================================================================== -->
+      <section class="tab-view" id="viewSlides">
+
+        <span class="m-section-label">CONFIRMAR TROCA DE APRESENTADOR (ZERA DECRESCENTE)</span>
+        <div class="phase-grid-2x2" id="phaseButtonsGrid">
+          <button class="phase-select-btn" data-confirm-phase="yago">
+            <span>1. Yago Armand</span>
+            <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--brand-primary);">Slides 1–2 • 04:00</span>
+          </button>
+          <button class="phase-select-btn" data-confirm-phase="carlos">
+            <span>2. Carlos</span>
+            <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--brand-primary);">Slides 3–4 • 04:30</span>
+          </button>
+          <button class="phase-select-btn" data-confirm-phase="amando">
+            <span>3. Amando Luiz</span>
+            <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--brand-primary);">Slides 5–7 • 05:30</span>
+          </button>
+          <button class="phase-select-btn" data-confirm-phase="perguntas">
+            <span>4. Perguntas</span>
+            <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--brand-primary);">Debate • 04:00</span>
+          </button>
         </div>
-        <ul class="notes-list" id="notesBulletsList"></ul>
+
+        <span class="m-section-label" style="margin-top: 6px;">PULAR DIRETO PARA UM DOS 7 SLIDES</span>
+        <div id="slidesListContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+        <span class="m-section-label" style="margin-top: 6px;">LISTA DUPLAMENTE ENCADEADA (TODOS OS 28 NÓS)</span>
+        <div id="linkedNodesFullList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+
+      </section>
+
+      <!-- ====================================================================
+           VIEW 4: REDE WI-FI (LINK DO PC) & AJUSTES DA TELA DA SALA
+           ==================================================================== -->
+      <section class="tab-view" id="viewNetwork">
+
+        <div class="m-card" style="border-color: var(--border-active);">
+          <div class="m-row-between">
+            <span class="m-badge">📡 SERVIDOR LOCAL EMBARCADO</span>
+            <span class="m-badge emerald" id="netClientsBadge">0 PCs Conectados</span>
+          </div>
+
+          <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.45;">
+            Conecte o celular e o PC da sala no mesmo Wi-Fi (ou ligue o <strong>Roteador Wi-Fi / Hotspot</strong> do celular) e abra este link no navegador do PC:
+          </p>
+
+          <div style="padding: 14px; border-radius: 12px; background: var(--bg-input); border: 1.5px solid var(--brand-primary); text-align: center;">
+            <div id="lanPrimaryUrlText" style="font-family: var(--font-mono); font-size: 1.22rem; font-weight: 800; color: var(--brand-primary); user-select: all;">
+              http://192.168.0.100:8080
+            </div>
+          </div>
+
+          <button class="m-btn primary" id="copyLanUrlBtn" style="width: 100%;">
+            📋 Copiar Link da Apresentação
+          </button>
+
+          <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 4px;">
+            <span class="m-section-label">TODOS OS IPs DETECTADOS NO APARELHO:</span>
+            <div id="allDetectedUrlsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+          </div>
+        </div>
+
+        <span class="m-section-label">CONTROLES REMOTOS DA TELA DO PC (PROJETOR)</span>
+        <div class="m-card">
+          <div class="m-row-between">
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">Tema do Projetor</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Alternar fundo escuro ou claro na sala</div>
+            </div>
+            <button class="m-btn" id="remoteThemeBtn">
+              <span id="remoteThemeLabel">☀️ Mudar p/ Claro</span>
+            </button>
+          </div>
+
+          <div class="m-row-between" style="padding-top: 10px; border-top: 1px solid var(--border-hairline);">
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">Dicas no Canto Direito</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Exibir lembretes discretos ao lado dos timers</div>
+            </div>
+            <button class="m-btn" id="remoteTipsToggleBtn">💡 Dicas ON</button>
+          </div>
+
+          <div class="m-row-between" style="padding-top: 10px; border-top: 1px solid var(--border-hairline);">
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">Escala da Fonte no PC</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Ajustar legibilidade para o projetor</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="m-btn" id="remoteFontDecBtn" style="min-width: 52px;">A-</button>
+              <button class="m-btn" id="remoteFontIncBtn" style="min-width: 52px;">A+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-card">
+          <span class="m-section-label">💡 DICA DE ERGONOMIA NO ANDROID</span>
+          <p style="font-size: 0.88rem; color: var(--text-sub); line-height: 1.45;">
+            Você pode usar os botões físicos de <strong>Volume +</strong> e <strong>Volume -</strong> na lateral do celular para avançar ou voltar na linearidade da apresentação sem precisar olhar para a tela!
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ======================================================================
+         3. PERSISTENT BOTTOM THUMB DOCK
+         Row 1: Doubly Linked List Linear Navigation (⬅ Anterior | Nó | Avançar ➡)
+         Row 2: 4 Minimalist Navigation Tabs
+         ====================================================================== -->
+    <footer class="app-bottom-dock">
+      <div class="linear-thumb-bar">
+        <button class="thumb-step-btn" id="linearPrevNodeBtn">
+          <span>⬅ Ant.</span>
+        </button>
+
+        <div class="current-node-center" id="centerNodeInfoBtn" title="Toque para ver a lista completa dos 28 nós">
+          <span class="cn-counter" id="liveNodeIndexLabel">NÓ 01 / 28</span>
+          <span class="cn-label" id="bottomNodeShortLabel">S1 • Visão Geral</span>
+        </div>
+
+        <button class="thumb-step-btn next-primary" id="linearNextNodeBtn">
+          <span>Avançar ➡</span>
+        </button>
       </div>
-    </section>
 
-  </main>
+      <nav class="bottom-nav-tabs" id="bottomNavTabs">
+        <button class="b-tab-btn active" data-tab-target="viewControl">
+          <span class="b-icon">🎛️</span>
+          <span>Controle</span>
+        </button>
+        <button class="b-tab-btn" data-tab-target="viewScript">
+          <span class="b-icon">🎙️</span>
+          <span>Roteiro</span>
+        </button>
+        <button class="b-tab-btn" data-tab-target="viewSlides">
+          <span class="b-icon">🗂️</span>
+          <span>7 Slides</span>
+        </button>
+        <button class="b-tab-btn" data-tab-target="viewNetwork">
+          <span class="b-icon">📡</span>
+          <span>Rede &amp; Tela</span>
+        </button>
+      </nav>
+    </footer>
 
-  <!-- ========================================================================
-       6. MOBILE BOTTOM NAVIGATION BAR (For 1-Handed Smartphone Use)
-       ======================================================================== -->
-  <nav class="mobile-tab-bar" id="mobileTabBar">
-    <button class="mobile-tab-item active" data-target-panel="panelControls">
-      <span style="font-size: 1.15rem;">🎛️</span>
-      <span>Gráficos &amp; Controle</span>
-    </button>
-    <button class="mobile-tab-item" data-target-panel="panelNotes">
-      <span style="font-size: 1.15rem;">🎙️</span>
-      <span>Guia de Fala</span>
-    </button>
-    <button class="mobile-tab-item" data-target-panel="panelSlides">
-      <span style="font-size: 1.15rem;">🗂️</span>
-      <span>7 Slides &amp; Troca</span>
-    </button>
-  </nav>
-
-  <!-- ========================================================================
-       7. LAN CONNECTION & QR CODE MODAL
-       ======================================================================== -->
-  <div class="lan-modal-backdrop" id="lanModalBackdrop">
-    <div class="lan-modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <span style="font-family: var(--font-mono); font-size: 0.76rem; color: #22d3ee; font-weight: 800;">CONEXÃO LOCAL WI-FI / HOTSPOT</span>
-          <h3 style="font-size: 1.3rem; font-weight: 800; color: #f8fafc;">Como Abrir a Guia no PC da Sala</h3>
-        </div>
-        <button class="hud-btn" id="closeLanModalBtn">✕</button>
-      </div>
-
-      <div style="padding: 14px; border-radius: 12px; background: #161c2a; border: 1px solid rgba(34,211,238,0.4); display: flex; flex-direction: column; gap: 8px;">
-        <span style="font-size: 0.85rem; color: #cbd5e1;">
-          1. Conecte o <strong>celular</strong> e o <strong>PC da sala</strong> na mesma rede Wi-Fi (ou ligue o <strong>Roteador Wi-Fi / Hotspot</strong> do celular e conecte o PC nele).
-        </span>
-        <span style="font-size: 0.85rem; color: #cbd5e1;">
-          2. No navegador do PC, digite exatamente o endereço abaixo:
-        </span>
-        <div style="padding: 12px; border-radius: 10px; background: #090d16; border: 1.5px solid #22d3ee; text-align: center;">
-          <span id="modalPrimaryUrl" style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 800; color: #22d3ee; user-select: all;">
-            http://192.168.0.100:8080
-          </span>
-        </div>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: #94a3b8; font-weight: 800;">
-          TODOS OS ENDEREÇOS DE REDE DETECTADOS NO APARELHO:
-        </span>
-        <div id="allDetectedUrlsList" style="display: flex; flex-direction: column; gap: 6px;"></div>
-      </div>
-    </div>
   </div>
 
   <script src="shared-data.js"></script>

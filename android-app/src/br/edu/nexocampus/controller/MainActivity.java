@@ -55,7 +55,10 @@ public class MainActivity extends Activity {
 
         // Setup Full-Screen Hardware-Accelerated WebView for Master Controller
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.parseColor("#07090e"));
+        webView.setBackgroundColor(Color.parseColor("#090b10"));
+        webView.setVerticalScrollBarEnabled(true);
+        webView.setHorizontalScrollBarEnabled(false);
+        webView.setScrollbarFadingEnabled(false);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);

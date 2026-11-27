@@ -28,6 +28,7 @@ EOF
 cp "$PROJECT_ROOT/index.html" "$APP_DIR/assets/www/"
 cp "$PROJECT_ROOT/projetor.html" "$APP_DIR/assets/www/"
 cp "$PROJECT_ROOT/styles.css" "$APP_DIR/assets/www/"
+cp "$PROJECT_ROOT/mobile-app.css" "$APP_DIR/assets/www/"
 cp "$PROJECT_ROOT/shared-data.js" "$APP_DIR/assets/www/"
 cp "$PROJECT_ROOT/app.js" "$APP_DIR/assets/www/"
 cp "$PROJECT_ROOT/assets/"*.svg "$APP_DIR/assets/www/assets/"
