@@ -1,20 +1,27 @@
 /**
  * ============================================================================
  * CASO NEXO CAMPUS TECNOLOGIA — SEMINÁRIO GRUPO 3
+ * Android Master Controller App & Local Network (LAN) Presentation Logic
  * Doubly Linked List Linear Navigation + Parallel Triggers + Predictive Timers
- * Control Tab (index.html)  ===>  Projector Tab (projetor.html)
  * ============================================================================
  */
 
 document.addEventListener("DOMContentLoaded", () => {
   const syncBus = new NexoSyncBus("controller");
 
-  // Top Bar Elements
-  const launchProjectorBtn = document.getElementById("launchProjectorBtn");
+  // LAN Connection Bar & Modal Elements
+  const lanPrimaryUrlText = document.getElementById("lanPrimaryUrlText");
+  const copyLanUrlBtn = document.getElementById("copyLanUrlBtn");
+  const showLanModalBtn = document.getElementById("showLanModalBtn");
+  const lanModalBackdrop = document.getElementById("lanModalBackdrop");
+  const closeLanModalBtn = document.getElementById("closeLanModalBtn");
+  const modalPrimaryUrl = document.getElementById("modalPrimaryUrl");
+  const allDetectedUrlsList = document.getElementById("allDetectedUrlsList");
   const syncStatusPill = document.getElementById("syncStatusPill");
   const syncStatusDot = document.getElementById("syncStatusDot");
   const syncStatusText = document.getElementById("syncStatusText");
 
+  // Timers & Handoff Elements
   const ctrlGeneralTimerPill = document.getElementById("ctrlGeneralTimerPill");
   const ctrlGeneralTime = document.getElementById("ctrlGeneralTime");
   const ctrlPredictedTotal = document.getElementById("ctrlPredictedTotal");
@@ -44,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bannerConfirmBtn = document.getElementById("bannerConfirmBtn");
   const bannerDismissBtn = document.getElementById("bannerDismissBtn");
 
-  // Cockpit Columns
+  // Cockpit Panels & Mobile Tabs
   const phaseButtonsGrid = document.getElementById("phaseButtonsGrid");
   const slidesListContainer = document.getElementById("slidesListContainer");
   const miniPreviewIframe = document.getElementById("miniPreviewIframe");
@@ -55,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const livePacingBanner = document.getElementById("livePacingBanner");
   const closeRemoteModalBtn = document.getElementById("closeRemoteModalBtn");
   const triggersGridContainer = document.getElementById("triggersGridContainer");
+  const mobileTabBar = document.getElementById("mobileTabBar");
 
   // Teleprompter Elements
   const notesTargetTime = document.getElementById("notesTargetTime");
@@ -84,34 +92,96 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Launch Classroom Projector Tab
-  launchProjectorBtn.addEventListener("click", () => {
-    const win = syncBus.openProjectorTab();
-    if (win) updateConnectionUI(true);
-  });
+  /* ==========================================================================
+     0. LAN SERVER INFO & LINK GENERATION UI
+     ========================================================================== */
+  function updateLanServerUI(info) {
+    if (!info) return;
+    const url = info.primaryUrl || "http://192.168.0.100:8080";
+    lanPrimaryUrlText.textContent = url;
+    modalPrimaryUrl.textContent = url;
 
-  function updateConnectionUI(isConnected) {
-    if (isConnected) {
-      syncStatusPill.classList.add("connected");
-      syncStatusDot.textContent = "🟢";
-      syncStatusText.textContent = "Projetor Sincronizado";
-      launchProjectorBtn.innerHTML = `<span>🔄 Focar / Reabrir Guia da Turma</span>`;
+    const clients = info.connectedClients || 0;
+    syncStatusPill.classList.add("connected");
+    syncStatusDot.textContent = clients > 0 ? "🟢" : "📡";
+    syncStatusText.textContent = clients > 0
+      ? `${clients} PC(s) Conectado(s) na Sala`
+      : "Servidor Ativo • Abra o link no PC";
+
+    const urls = (info.urls && info.urls.length > 0) ? info.urls : [url];
+    allDetectedUrlsList.innerHTML = urls.map((u) => `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:8px; background:#161c2a; border:1px solid rgba(255,255,255,0.1);">
+        <span style="font-family:var(--font-mono); font-size:0.95rem; font-weight:700; color:#f8fafc; user-select:all;">${u}</span>
+        <button class="lan-copy-btn" data-copy-url="${u}" style="padding:4px 10px; font-size:0.76rem;">Copiar</button>
+      </div>
+    `).join("");
+
+    allDetectedUrlsList.querySelectorAll("[data-copy-url]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        copyTextToClipboard(btn.getAttribute("data-copy-url"), btn);
+      });
+    });
+  }
+
+  function copyTextToClipboard(text, btnEl) {
+    syncBus.vibrate(20);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btnEl.textContent;
+        btnEl.textContent = "✓ Copiado!";
+        setTimeout(() => { btnEl.textContent = orig; }, 1500);
+      }).catch(() => fallbackCopy(text, btnEl));
     } else {
-      syncStatusPill.classList.remove("connected");
-      syncStatusDot.textContent = "⚪";
-      syncStatusText.textContent = "Guia da turma fechada";
-      launchProjectorBtn.innerHTML = `<span>🚀 Iniciar Apresentação (Abrir Guia da Turma)</span>`;
+      fallbackCopy(text, btnEl);
     }
   }
 
-  syncBus.onProjectorStatusChange((isOpen) => updateConnectionUI(isOpen));
+  function fallbackCopy(text, btnEl) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    const orig = btnEl.textContent;
+    btnEl.textContent = "✓ Copiado!";
+    setTimeout(() => { btnEl.textContent = orig; }, 1500);
+  }
 
-  setInterval(() => {
-    if (syncBus.projectorWindow && syncBus.projectorWindow.closed) {
-      syncBus.projectorWindow = null;
-      updateConnectionUI(false);
-    }
-  }, 1500);
+  copyLanUrlBtn.addEventListener("click", () => {
+    copyTextToClipboard(lanPrimaryUrlText.textContent, copyLanUrlBtn);
+  });
+
+  showLanModalBtn.addEventListener("click", () => {
+    syncBus.vibrate(20);
+    lanModalBackdrop.classList.add("open");
+  });
+
+  closeLanModalBtn.addEventListener("click", () => {
+    lanModalBackdrop.classList.remove("open");
+  });
+
+  lanModalBackdrop.addEventListener("click", (e) => {
+    if (e.target === lanModalBackdrop) lanModalBackdrop.classList.remove("open");
+  });
+
+  syncBus.onServerInfoChange((info) => updateLanServerUI(info));
+
+  // Mobile Bottom Tabs Switcher
+  if (mobileTabBar) {
+    mobileTabBar.querySelectorAll(".mobile-tab-item").forEach((tabBtn) => {
+      tabBtn.addEventListener("click", () => {
+        syncBus.vibrate(15);
+        const targetId = tabBtn.getAttribute("data-target-panel");
+        mobileTabBar.querySelectorAll(".mobile-tab-item").forEach((b) => b.classList.remove("active"));
+        tabBtn.classList.add("active");
+
+        document.querySelectorAll(".cockpit-panel").forEach((p) => {
+          p.classList.toggle("mobile-active-panel", p.id === targetId);
+        });
+      });
+    });
+  }
 
   /* ==========================================================================
      1. DOUBLY LINKED LIST NAVIGATION (Ant <-> Atual <-> Prox)
@@ -122,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function goToLinkedNode(node) {
     if (!node) return;
+    syncBus.vibrate(25);
 
-    // Check if this node belongs to a different speaker phase than the currently confirmed one
     const currentPhase = syncBus.state.speakerPhase || "yago";
     let pendingHandoff = syncBus.state.pendingHandoffTo;
 
@@ -170,10 +240,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Expose to Android Physical Volume Keys (Volume Up = Next Node, Volume Down = Prev Node)
+  window.nexoStepNext = stepLinearNext;
+  window.nexoStepPrev = stepLinearPrev;
+
   linearPrevNodeBtn.addEventListener("click", stepLinearPrev);
   linearNextNodeBtn.addEventListener("click", stepLinearNext);
 
-  // Render the Fixed Linear Doubly Linked List Track Bar
   function renderLinearTrackBar() {
     const curr = getCurrentLinkedNode();
     linearPrevNodeBtn.disabled = !curr.prev;
@@ -207,9 +280,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ==========================================================================
-     2. PARALLEL NAVIGATION (Mouse / Hotkeys) WITH LINKED LIST SYNC
+     2. PARALLEL NAVIGATION (Touch / Mouse / Hotkeys) WITH LINKED LIST SYNC
      ========================================================================== */
   function navigateParallel(slideIndex, modalId = null, tabIdx = 0) {
+    syncBus.vibrate(20);
     const matchedNode = PRESENTATION_LINKED_LIST.findBestMatch(slideIndex, modalId, tabIdx);
     const currentPhase = syncBus.state.speakerPhase || "yago";
     let pendingHandoff = syncBus.state.pendingHandoffTo;
@@ -249,10 +323,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function confirmSpeakerPhase(phaseKey) {
     const phase = SPEAKER_PHASES[phaseKey];
     if (!phase) return;
+    syncBus.vibrate(45);
 
     dismissedHandoffPhase = null;
 
-    // Ensure timer is running once confirmed
     if (!timerRunning) {
       startTimerLoop();
     }
@@ -307,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function pauseOrResumeTimer() {
+    syncBus.vibrate(25);
     if (!syncBus.state.presentationStarted) {
       confirmSpeakerPhase("yago");
       return;
@@ -321,6 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resetAllTimers() {
+    syncBus.vibrate(40);
     timerRunning = false;
     clearInterval(timerInterval);
     timerPauseResumeBtn.textContent = "▶";
@@ -339,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Quick Confirm Button in Top Bar
   quickConfirmPhaseBtn.addEventListener("click", () => {
     if (!syncBus.state.presentationStarted) {
       confirmSpeakerPhase("yago");
@@ -349,7 +424,6 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmSpeakerPhase(syncBus.state.pendingHandoffTo);
       return;
     }
-    // Otherwise advance to next logical speaker phase
     const currentPhase = SPEAKER_PHASES[syncBus.state.speakerPhase || "yago"];
     if (currentPhase && currentPhase.nextPhase) {
       confirmSpeakerPhase(currentPhase.nextPhase);
@@ -358,7 +432,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Banner Confirm & Dismiss
   bannerConfirmBtn.addEventListener("click", () => {
     if (syncBus.state.pendingHandoffTo) {
       confirmSpeakerPhase(syncBus.state.pendingHandoffTo);
@@ -370,7 +443,6 @@ document.addEventListener("DOMContentLoaded", () => {
     syncBus.updateState({ pendingHandoffTo: null });
   });
 
-  // Manual 4-Phase Grid Buttons in Column 1
   phaseButtonsGrid.querySelectorAll("[data-confirm-phase]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const targetPhase = btn.getAttribute("data-confirm-phase");
@@ -388,42 +460,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const state = syncBus.state;
     const phase = SPEAKER_PHASES[state.speakerPhase || "yago"] || SPEAKER_PHASES.yago;
 
-    // Top bar general timer
     ctrlGeneralTime.textContent = formatSec(state.generalElapsedSec || 0);
     ctrlPredictedTotal.textContent = `(Prev ~${state.predictedTotalText || "14:00"})`;
     ctrlGeneralTimerPill.className = `timer-pill-state state-${state.generalColor || "green"}`;
 
-    // Top bar speaker timer
     ctrlSpeakerPhaseLabel.textContent = `${phase.shortName} ↘`;
     ctrlSpeakerTime.textContent = formatSec(state.speakerRemainingSec !== undefined ? state.speakerRemainingSec : phase.budgetSec);
     ctrlSpeakerTimerPill.className = `timer-pill-state state-${state.speakerColor || "green"}`;
 
-    // Quick Confirm Button Label
     if (!state.presentationStarted) {
       quickConfirmPhaseBtn.textContent = `✅ Confirmar Início: Yago (04:00)`;
     } else if (state.pendingHandoffTo && SPEAKER_PHASES[state.pendingHandoffTo]) {
       const nextP = SPEAKER_PHASES[state.pendingHandoffTo];
-      quickConfirmPhaseBtn.textContent = `🔔 Confirmar Entrada: ${nextP.name} (${formatSec(nextP.budgetSec)})`;
+      quickConfirmPhaseBtn.textContent = `🔔 Confirmar: ${nextP.name} (${formatSec(nextP.budgetSec)})`;
     } else if (phase.nextPhase && SPEAKER_PHASES[phase.nextPhase]) {
       const nextP = SPEAKER_PHASES[phase.nextPhase];
       quickConfirmPhaseBtn.textContent = `🔄 Trocar p/ ${nextP.shortName} (${formatSec(nextP.budgetSec)})`;
     } else {
-      quickConfirmPhaseBtn.textContent = `🔄 Reiniciar Timer Perguntas (04:00)`;
+      quickConfirmPhaseBtn.textContent = `🔄 Reiniciar Perguntas (04:00)`;
     }
 
-    // Highlight active phase in Column 1 grid
     phaseButtonsGrid.querySelectorAll("[data-confirm-phase]").forEach((btn) => {
       const pKey = btn.getAttribute("data-confirm-phase");
       btn.classList.toggle("active", state.presentationStarted && state.speakerPhase === pKey);
     });
 
-    // Handoff Banner
     if (state.pendingHandoffTo && SPEAKER_PHASES[state.pendingHandoffTo]) {
       const pendingP = SPEAKER_PHASES[state.pendingHandoffTo];
       handoffConfirmBanner.style.display = "flex";
-      handoffBannerTitle.textContent = `Confirmar Troca para: ${pendingP.name} (${pendingP.roleLabel})`;
-      handoffBannerDesc.textContent = `Clique para confirmar a troca e reiniciar o timer decrescente para ${formatSec(pendingP.budgetSec)}.`;
-      bannerConfirmBtn.textContent = `✅ Confirmar Entrada de ${pendingP.name} (${formatSec(pendingP.budgetSec)})`;
+      handoffBannerTitle.textContent = `Troca para: ${pendingP.name} (${pendingP.roleLabel})`;
+      handoffBannerDesc.textContent = `Toque para confirmar a entrada e reiniciar o timer decrescente para ${formatSec(pendingP.budgetSec)}.`;
+      bannerConfirmBtn.textContent = `✅ Confirmar ${pendingP.shortName} (${formatSec(pendingP.budgetSec)})`;
     } else {
       handoffConfirmBanner.style.display = "none";
     }
@@ -474,18 +541,17 @@ document.addEventListener("DOMContentLoaded", () => {
       liveModalStatusBanner.style.borderColor = "#22d3ee";
       liveModalStatusBanner.style.background = "rgba(6, 182, 212, 0.14)";
       liveModalStatusBanner.innerHTML = `
-        🟢 <strong>JANELA ABERTA NA SALA:</strong> ${mData.title}
+        🟢 <strong>JANELA ABERTA NO PC DA SALA:</strong> ${mData.title}
         ${activeTabLabel ? `<br><span style="font-size:0.82rem; color:#22d3ee;">↳ Aba: ${activeTabLabel}</span>` : ""}
       `;
       closeRemoteModalBtn.style.display = "inline-flex";
     } else {
       liveModalStatusBanner.style.borderColor = "rgba(255,255,255,0.12)";
       liveModalStatusBanner.style.background = "#0f131d";
-      liveModalStatusBanner.innerHTML = `📺 Tela da sala mostrando: <strong>Slide 0${slideNum} Limpo (Visão Geral)</strong>`;
+      liveModalStatusBanner.innerHTML = `📺 Tela do PC mostrando: <strong>Slide 0${slideNum} Limpo (Visão Geral)</strong>`;
       closeRemoteModalBtn.style.display = "none";
     }
 
-    // Predictive Pacing Banner
     const pColor = state.speakerColor || "green";
     const pIcon = pColor === "red" ? "🔴" : pColor === "yellow" ? "🟡" : "🟢";
     livePacingBanner.textContent = `${pIcon} Previsão de Ritmo: ${state.pacingAdvice || "Ritmo ideal"}`;
@@ -503,7 +569,6 @@ document.addEventListener("DOMContentLoaded", () => {
       livePacingBanner.style.color = "#34d399";
     }
 
-    // Build Parallel Trigger Cards
     triggersGridContainer.innerHTML = "";
     info.cards.forEach((cardInfo) => {
       const mData = INTERACTIVE_MODALS[cardInfo.id];
@@ -532,13 +597,13 @@ document.addEventListener("DOMContentLoaded", () => {
       cardEl.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-family:var(--font-mono); font-size:0.76rem; font-weight:800; color:${isActive ? "#22d3ee" : "#94a3b8"};">
-            ${isActive ? "🟢 PROJETANDO NA SALA" : "JANELA & GRÁFICO"}
+            ${isActive ? "🟢 EXIBINDO NO PC DA SALA" : "JANELA & GRÁFICO"}
           </span>
-          <span class="hotkey-pill">Tecla ${cardInfo.hotkey}</span>
+          <span class="hotkey-pill">Atalho ${cardInfo.hotkey}</span>
         </div>
         <button class="trigger-main-btn" data-toggle-modal="${cardInfo.id}">
           <span style="text-align:left;">${cardInfo.label}</span>
-          <span>${isActive ? "✕ Fechar" : "📺 Abrir"}</span>
+          <span>${isActive ? "✕ Fechar" : "📺 Projetar"}</span>
         </button>
         ${subtabsHtml}
       `;
@@ -591,39 +656,37 @@ document.addEventListener("DOMContentLoaded", () => {
     syncMiniPreview(syncBus.state);
   }
 
-  // Projector Remote Controls
   closeRemoteModalBtn.addEventListener("click", () => {
     navigateParallel(syncBus.state.slideIndex, null, 0);
   });
 
   remoteTipsToggleBtn.addEventListener("click", () => {
+    syncBus.vibrate(15);
     syncBus.updateState({ showProjectorTips: syncBus.state.showProjectorTips === false });
   });
 
   remoteThemeBtn.addEventListener("click", () => {
+    syncBus.vibrate(15);
     const nextTheme = syncBus.state.theme === "dark" ? "light" : "dark";
     syncBus.updateState({ theme: nextTheme });
   });
 
   remoteFontDecBtn.addEventListener("click", () => {
+    syncBus.vibrate(15);
     const nextScale = Math.max(0.8, +((syncBus.state.fontScale || 1.0) - 0.06).toFixed(2));
     syncBus.updateState({ fontScale: nextScale });
   });
 
   remoteFontIncBtn.addEventListener("click", () => {
+    syncBus.vibrate(15);
     const nextScale = Math.min(1.25, +((syncBus.state.fontScale || 1.0) + 0.06).toFixed(2));
     syncBus.updateState({ fontScale: nextScale });
   });
 
-  /* ==========================================================================
-     5. KEYBOARD ERGONOMICS:
-        - ArrowLeft & ArrowRight are EXCLUSIVELY Doubly Linked List (.prev / .next)
-        - All other keys (1-7, A/S/D/F/V, Esc, Enter) work in parallel!
-     ========================================================================== */
+  // Keyboard Ergonomics (when used with external clicker/keyboard)
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
 
-    // EXCLUSIVE DOUBLY LINKED LIST NAVIGATION ON LEFT / RIGHT ARROWS
     if (e.key === "ArrowRight") {
       e.preventDefault();
       stepLinearNext();
@@ -636,7 +699,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Enter confirms pending speaker handoff or start if pending
     if (e.key === "Enter" && (!syncBus.state.presentationStarted || syncBus.state.pendingHandoffTo)) {
       e.preventDefault();
       quickConfirmPhaseBtn.click();
@@ -655,7 +717,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const slideNum = (syncBus.state.slideIndex || 0) + 1;
     const info = SLIDE_SPEAKER_DATA[slideNum];
 
-    // Parallel Modal / Chart Triggers (A, S, D, F, V)
     if (["A", "S", "D", "F", "V"].includes(keyUpper)) {
       const cardMatch = info.cards.find((c) => c.hotkey.toUpperCase() === keyUpper);
       if (cardMatch) {
@@ -676,7 +737,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Direct Slide Jump (Keys 1 to 7)
     if (["1", "2", "3", "4", "5", "6", "7"].includes(e.key)) {
       e.preventDefault();
       navigateParallel(parseInt(e.key, 10) - 1, null, 0);

@@ -11,10 +11,24 @@ class NexoSyncBus {
     this.role = role; // 'controller' | 'projector'
     this.projectorWindow = null;
     this.channel = null;
+    this.eventSource = null;
     this.listeners = [];
+    this.serverInfoListeners = [];
     this.storageKey = "nexo_campus_sync_state_v2";
+    this.lastAppliedTimestamp = 0;
 
-    // Default presentation state shared between Control Tab and Projector Tab
+    // Server info populated from Android Native Bridge or /api/info
+    this.serverInfo = {
+      isAndroidApp: Boolean(window.AndroidHost),
+      primaryUrl: window.location.origin !== "null" && !window.location.origin.startsWith("file")
+        ? window.location.origin
+        : "http://192.168.0.100:8080",
+      urls: [],
+      port: 8080,
+      connectedClients: 0
+    };
+
+    // Default presentation state shared between Android Master App and PC Browser Projector
     this.state = {
       slideIndex: 0,           // 0 to 6 (Slides 1 to 7)
       activeModalId: null,     // e.g. 's1-empresa', 's2-lideranca', or null
@@ -39,7 +53,16 @@ class NexoSyncBus {
   }
 
   _initChannels() {
-    // 1. BroadcastChannel API (works across same-origin tabs)
+    // 1. Check if running inside our Native Android App WebView (window.AndroidHost)
+    if (window.AndroidHost) {
+      this._refreshAndroidServerInfo();
+      setInterval(() => this._refreshAndroidServerInfo(), 1500);
+    } else if (window.location.protocol.startsWith("http")) {
+      // Running in a browser connected to the Android App's LAN Server (or local server)
+      this._initLanNetworkSync();
+    }
+
+    // 2. BroadcastChannel API (fallback when testing two tabs on same device)
     if ("BroadcastChannel" in window) {
       try {
         this.channel = new BroadcastChannel("nexo_campus_channel_v2");
@@ -48,24 +71,22 @@ class NexoSyncBus {
             this._applyIncomingState(event.data.payload);
           } else if (event.data && event.data.type === "PROJECTOR_READY" && this.role === "controller") {
             this.broadcastState();
-            this._notifyProjectorStatus(true);
           }
         };
       } catch (e) {}
     }
 
-    // 2. window.postMessage API (works across file:// tabs opened via window.open)
+    // 3. window.postMessage API (for embedded preview iframe)
     window.addEventListener("message", (event) => {
       if (!event.data || typeof event.data !== "object") return;
       if (event.data.type === "STATE_UPDATE") {
         this._applyIncomingState(event.data.payload);
       } else if (event.data.type === "PROJECTOR_READY" && this.role === "controller") {
         this.broadcastState();
-        this._notifyProjectorStatus(true);
       }
     });
 
-    // 3. localStorage fallback event
+    // 4. localStorage fallback
     window.addEventListener("storage", (event) => {
       if (event.key === this.storageKey && event.newValue) {
         try {
@@ -75,7 +96,7 @@ class NexoSyncBus {
       }
     });
 
-    // Load last saved state if available
+    // Load last saved state if available locally
     try {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
@@ -84,37 +105,99 @@ class NexoSyncBus {
       }
     } catch (e) {}
 
-    // If this tab is the Projector, announce readiness to opener & channel
+    // If inside AndroidHost and controller, push initial state to native server
+    if (window.AndroidHost && this.role === "controller") {
+      try {
+        window.AndroidHost.pushState(JSON.stringify(this.state));
+      } catch (e) {}
+    }
+  }
+
+  _refreshAndroidServerInfo() {
+    if (!window.AndroidHost) return;
+    try {
+      const raw = window.AndroidHost.getServerInfo();
+      if (raw) {
+        const info = JSON.parse(raw);
+        this.serverInfo = {
+          isAndroidApp: true,
+          primaryUrl: info.primaryUrl || "http://127.0.0.1:8080",
+          urls: info.urls || [],
+          port: info.port || 8080,
+          connectedClients: info.connectedClients || 0
+        };
+        this.serverInfoListeners.forEach((cb) => cb(this.serverInfo));
+      }
+    } catch (e) {}
+  }
+
+  _initLanNetworkSync() {
+    // If this is the PC Browser viewing projetor.html served by the Android App over Wi-Fi:
     if (this.role === "projector") {
-      setTimeout(() => {
-        if (window.opener && !window.opener.closed) {
-          try {
-            window.opener.postMessage({ type: "PROJECTOR_READY" }, "*");
-          } catch (e) {}
-        }
-        if (this.channel) {
-          try {
-            this.channel.postMessage({ type: "PROJECTOR_READY" });
-          } catch (e) {}
-        }
-      }, 120);
+      // 1. Connect to Server-Sent Events (/api/events) for instant push from the phone
+      if ("EventSource" in window) {
+        try {
+          this.eventSource = new EventSource("/api/events");
+          this.eventSource.onmessage = (e) => {
+            if (e.data) {
+              try {
+                const incoming = JSON.parse(e.data);
+                this._applyIncomingState(incoming);
+              } catch (err) {}
+            }
+          };
+        } catch (e) {}
+      }
+
+      // 2. Also poll /api/state every 450ms as ultra-resilient fallback on university networks
+      const fetchState = () => {
+        fetch("/api/state", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => {
+            if (data && data.timestamp) {
+              this._applyIncomingState(data);
+            }
+          })
+          .catch(() => {});
+      };
+      fetchState();
+      setInterval(fetchState, 450);
+    } else if (this.role === "controller") {
+      // Controller running in browser via HTTP server: poll /api/info for LAN URL & client count
+      const pollInfo = () => {
+        fetch("/api/info", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((info) => {
+            if (info) {
+              this.serverInfo = {
+                isAndroidApp: false,
+                primaryUrl: info.primaryUrl || window.location.origin,
+                urls: info.urls || [window.location.origin],
+                port: info.port || 8080,
+                connectedClients: info.connectedClients || 0
+              };
+              this.serverInfoListeners.forEach((cb) => cb(this.serverInfo));
+            }
+          })
+          .catch(() => {});
+      };
+      pollInfo();
+      setInterval(pollInfo, 1500);
     }
   }
 
-  openProjectorTab() {
-    // Open projetor.html in a new tab/window so the user can drag it to Monitor 2
-    this.projectorWindow = window.open("projetor.html", "NexoCampusProjetorTurma");
-    if (this.projectorWindow) {
-      this._notifyProjectorStatus(true);
-      // Send initial state after short boot delay
-      setTimeout(() => this.broadcastState(), 250);
-      setTimeout(() => this.broadcastState(), 700);
+  vibrate(ms = 25) {
+    if (window.AndroidHost && window.AndroidHost.vibrate) {
+      try {
+        window.AndroidHost.vibrate(ms);
+        return;
+      } catch (e) {}
     }
-    return this.projectorWindow;
-  }
-
-  isProjectorOpen() {
-    return Boolean(this.projectorWindow && !this.projectorWindow.closed);
+    if (navigator.vibrate) {
+      try {
+        navigator.vibrate(ms);
+      } catch (e) {}
+    }
   }
 
   updateState(partial) {
@@ -123,42 +206,54 @@ class NexoSyncBus {
       ...partial,
       timestamp: Date.now()
     };
+    this.lastAppliedTimestamp = this.state.timestamp;
     this.broadcastState();
     this._emit(this.state);
   }
 
   broadcastState() {
+    const stateJson = JSON.stringify(this.state);
+
+    // 1. Push directly to Native Android LAN Server if inside the Android App
+    if (window.AndroidHost && window.AndroidHost.pushState) {
+      try {
+        window.AndroidHost.pushState(stateJson);
+      } catch (e) {}
+    } else if (this.role === "controller" && window.location.protocol.startsWith("http")) {
+      // Push to HTTP LAN server if controller is opened over HTTP
+      fetch("/api/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: stateJson
+      }).catch(() => {});
+    }
+
     const msg = { type: "STATE_UPDATE", payload: this.state };
 
-    // Send via direct window reference (works even on file://)
+    // 2. Direct window reference if opened locally
     if (this.projectorWindow && !this.projectorWindow.closed) {
       try {
         this.projectorWindow.postMessage(msg, "*");
       } catch (e) {}
     }
 
-    // If projector tab also wants to notify opener
-    if (this.role === "projector" && window.opener && !window.opener.closed) {
-      try {
-        window.opener.postMessage(msg, "*");
-      } catch (e) {}
-    }
-
-    // Send via BroadcastChannel
+    // 3. BroadcastChannel
     if (this.channel) {
       try {
         this.channel.postMessage(msg);
       } catch (e) {}
     }
 
-    // Save to localStorage
+    // 4. localStorage
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.state));
+      localStorage.setItem(this.storageKey, stateJson);
     } catch (e) {}
   }
 
   _applyIncomingState(newState) {
     if (!newState) return;
+    if (newState.timestamp && newState.timestamp < this.lastAppliedTimestamp) return;
+    this.lastAppliedTimestamp = newState.timestamp || Date.now();
     this.state = { ...this.state, ...newState };
     this._emit(this.state);
   }
@@ -167,12 +262,9 @@ class NexoSyncBus {
     this.listeners.push(cb);
   }
 
-  onProjectorStatusChange(cb) {
-    this.statusCallback = cb;
-  }
-
-  _notifyProjectorStatus(isOpen) {
-    if (this.statusCallback) this.statusCallback(isOpen);
+  onServerInfoChange(cb) {
+    this.serverInfoListeners.push(cb);
+    cb(this.serverInfo);
   }
 
   _emit(state) {
